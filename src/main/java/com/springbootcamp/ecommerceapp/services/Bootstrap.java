@@ -1,9 +1,7 @@
 package com.springbootcamp.ecommerceapp.services;
 
 
-import com.springbootcamp.ecommerceapp.entities.Address;
-import com.springbootcamp.ecommerceapp.entities.Role;
-import com.springbootcamp.ecommerceapp.entities.User;
+import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.RoleRepository;
 import com.springbootcamp.ecommerceapp.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,17 +56,15 @@ public class Bootstrap implements ApplicationRunner {
             user1.addAddress(new Address("75/60, ballabgarh", "faridabad", "haryana", "778654", "india", "home"));
 
 
-            User user2 = new User("customer.customer@tothenew.com", "customer", "", "customer");
+            User user2 = new Customer("customer.customer@tothenew.com", "customer", "", "customer", "9873556644");
             user2.setPassword(passwordEncoder.encode("pass"));
-            user2.addRole(customer);
             user2.addAddress(new Address("B-70", "palwal", "haryana", "778884", "india", "home"));
             user2.addAddress(new Address("B-100", "london", "haryana", "778884", "india", "home"));
 
 
 
-            User user3 = new User("seller.seller@tothenew.com", "seller", "", "seller");
+            User user3 = new Seller("seller.seller@tothenew.com", "seller", "", "seller","bh7ht754r5", "amalgam pvt. lmt.", "9999988817");
             user3.setPassword(passwordEncoder.encode("pass"));
-            user3.addRole(seller);
             user3.addAddress(new Address("B-890", "rewari", "haryana", "778884", "india", "home"));
 
 

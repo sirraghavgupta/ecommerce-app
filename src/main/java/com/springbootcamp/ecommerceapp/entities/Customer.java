@@ -1,18 +1,35 @@
-//package com.springbootcamp.ecommerceapp.entities;
-//
-//import javax.persistence.CascadeType;
-//import javax.persistence.Entity;
-//import javax.persistence.JoinColumn;
-//import javax.persistence.OneToOne;
-//
-//@Entity
-//public class Customer {
-//
-//    private String contact;
-//
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "user_id")
-//    private User user;
-//
-//
-//}
+package com.springbootcamp.ecommerceapp.entities;
+
+import javax.persistence.*;
+
+@Entity
+public class Customer extends User{
+
+    private String contact;
+
+    public Customer(){
+        this.addRole(new Role(3, "ROLE_CUSTOMER"));
+    }
+
+    public Customer(String email, String firstName, String middleName, String lastName, String contact) {
+        super(email, firstName, middleName, lastName);
+        this.addRole(new Role(3, "ROLE_CUSTOMER"));
+        this.contact = contact;
+    }
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                super.toString() +
+                "contact='" + contact + '\'' +
+                '}';
+    }
+}

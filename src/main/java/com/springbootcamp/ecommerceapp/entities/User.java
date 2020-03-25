@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class User {
 
     @Id
@@ -22,7 +23,7 @@ public class User {
     private boolean isExpired;
     private boolean isLocked;
 
-    private Integer loginStatus=1;
+    private Integer loginStatus=0;
 
 
     @ManyToMany(fetch = FetchType.EAGER)
