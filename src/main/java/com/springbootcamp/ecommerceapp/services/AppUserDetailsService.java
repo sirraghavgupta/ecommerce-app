@@ -1,5 +1,6 @@
-package com.springbootcamp.springsecurity;
+package com.springbootcamp.ecommerceapp.services;
 
+import com.springbootcamp.ecommerceapp.services.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,11 +18,11 @@ public class AppUserDetailsService implements UserDetailsService {
     UserDao userDao;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         String encryptedPassword = passwordEncoder.encode("pass");
-        System.out.println("Trying to authenticate user ::" + username);
+        System.out.println("Trying to authenticate user ::" + email);
         System.out.println("Encrypted Password ::"+encryptedPassword);
-        UserDetails userDetails = userDao.loadUserByUsername(username);
+        UserDetails userDetails = userDao.loadUserByUsername(email);
         return userDetails;
     }
 }
