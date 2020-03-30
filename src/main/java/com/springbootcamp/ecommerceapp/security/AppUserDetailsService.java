@@ -1,6 +1,5 @@
-package com.springbootcamp.ecommerceapp.services;
+package com.springbootcamp.ecommerceapp.security;
 
-import com.springbootcamp.ecommerceapp.services.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

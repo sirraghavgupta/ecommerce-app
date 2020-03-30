@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-public class CommonController {
+public class LoginLogoutController {
 
     @Autowired
     private TokenStore tokenStore;
@@ -18,6 +18,7 @@ public class CommonController {
     public String index(){
         return "index";
     }
+
 
     @GetMapping("/doLogout")
     public String logout(HttpServletRequest request){

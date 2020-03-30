@@ -1,18 +1,15 @@
-package com.springbootcamp.ecommerceapp.services;
+package com.springbootcamp.ecommerceapp.bootloader;
 
 
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.*;
-import org.hibernate.Session;
+import com.springbootcamp.ecommerceapp.security.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import javax.persistence.EntityManager;
 
 @Component
 public class Bootstrap implements ApplicationRunner {
@@ -40,6 +37,7 @@ public class Bootstrap implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
         if(userRepository.count()<1){
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -60,18 +58,18 @@ public class Bootstrap implements ApplicationRunner {
             roleRepository.save(seller);
 
 
-            User user1 = new User("admin.admin@tothenew.com", "admin", "", "admin");
-            user1.setPassword(passwordEncoder.encode("pass"));
-            user1.addRole(admin);
-            user1.addRole(seller);
-            user1.addAddress(new Address("B-90", "homely", "haryana", "778884", "india", "home"));
-            user1.addAddress(new Address("75/60, ballabgarh", "faridabad", "haryana", "778654", "india", "home"));
+            Admin admin1 = new Admin("admin.admin@tothenew.com", "admin", "", "admin");
+            admin1.setPassword(passwordEncoder.encode("pass"));
+            admin1.addRole(admin);
+            admin1.addRole(seller);
+            admin1.addAddress(new Address("B-90", "homely", "haryana", "778884", "india", "home"));
+            admin1.addAddress(new Address("75/60, ballabgarh", "faridabad", "haryana", "778654", "india", "home"));
+            admin1.setActive(true);
 
-
-            Customer user2 = new Customer("customer.customer@tothenew.com", "customer", "", "customer", "9873556644");
-            user2.setPassword(passwordEncoder.encode("pass"));
-            user2.addAddress(new Address("B-70", "palwal", "haryana", "778884", "india", "home"));
-            user2.addAddress(new Address("B-100", "london", "haryana", "778884", "india", "home"));
+            Customer customer1 = new Customer("customer.customer@tothenew.com", "customer", "", "customer", "9873556644");
+            customer1.setPassword(passwordEncoder.encode("pass"));
+            customer1.addAddress(new Address("B-70", "palwal", "haryana", "778884", "india", "home"));
+            customer1.addAddress(new Address("B-100", "london", "haryana", "778884", "india", "home"));
 
 
 
@@ -81,8 +79,8 @@ public class Bootstrap implements ApplicationRunner {
 
 
 
-            userRepository.save(user1);
-            userRepository.save(user2);
+            userRepository.save(admin1);
+            userRepository.save(customer1);
             userRepository.save(seller1);
 
             System.out.println("Total users saved::"+userRepository.count());
@@ -114,13 +112,13 @@ public class Bootstrap implements ApplicationRunner {
             product1.setCategory(men);
             product1.addVariation(mSize);
             product1.addVariation(lSize);
+
             seller1.addProduct(product1);
 
-
             ProductReview review1 = new ProductReview("awesome", 4.3d);
-            review1.setAuthor(user2);
+            review1.setAuthor(customer1);
             ProductReview review2 = new ProductReview("confortable", 4.8d);
-            review2.setAuthor(user2);
+            review2.setAuthor(customer1);
 
             product1.addReview(review1);
             product1.addReview(review2);

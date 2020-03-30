@@ -1,7 +1,6 @@
-package com.springbootcamp.ecommerceapp.services;
+package com.springbootcamp.ecommerceapp.security;
 
 
-import com.springbootcamp.ecommerceapp.services.AppUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,8 +52,12 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers("/admin/home").hasAnyRole("ADMIN")
-                .antMatchers("/user/home").hasAnyRole("USER")
-                .antMatchers("/doLogout").hasAnyRole("ADMIN","USER")
+                .antMatchers("/seller/home").hasAnyRole("ADMIN","SELLER")
+                .antMatchers("/customer/home").hasAnyRole("ADMIN","CUSTOMER")
+                .antMatchers("/doLogout").hasAnyRole("ADMIN","CUSTOMER","SELLER")
+                .antMatchers("/register/*").anonymous()
+                .antMatchers("/activate/*").anonymous()
+                .antMatchers("/resend-activation-link/customer").anonymous()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

@@ -1,4 +1,4 @@
-package com.springbootcamp.ecommerceapp.services;
+package com.springbootcamp.ecommerceapp.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

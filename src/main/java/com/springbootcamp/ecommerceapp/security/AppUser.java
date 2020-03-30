@@ -1,5 +1,8 @@
-package com.springbootcamp.ecommerceapp.entities;
+package com.springbootcamp.ecommerceapp.security;
 
+import com.springbootcamp.ecommerceapp.entities.Address;
+import com.springbootcamp.ecommerceapp.entities.Role;
+import com.springbootcamp.ecommerceapp.entities.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

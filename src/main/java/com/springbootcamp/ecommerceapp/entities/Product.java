@@ -1,5 +1,7 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Entity;
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -23,20 +25,23 @@ public class Product {
     private boolean isActive;
     private boolean isDeleted;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "seller_user_id")
     private Seller seller;
 
 
+    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private Set<ProductVariation> variations;
 
-
+    @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")
     private Category category;
 
 
+    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductReview> reviews;
 
