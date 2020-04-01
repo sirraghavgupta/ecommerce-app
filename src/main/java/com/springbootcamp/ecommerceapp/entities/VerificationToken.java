@@ -8,7 +8,7 @@ import java.util.Date;
 @Entity
 public class VerificationToken {
 
-    private static final Integer EXPIRATION = 1;
+    private static final Integer EXPIRATION = 24*60;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

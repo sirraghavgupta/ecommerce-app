@@ -1,19 +1,21 @@
 package com.springbootcamp.ecommerceapp.services;
 
-import com.springbootcamp.ecommerceapp.dtos.CustomerDto;
-import com.springbootcamp.ecommerceapp.dtos.SellerDto;
-import com.springbootcamp.ecommerceapp.entities.Customer;
+import com.springbootcamp.ecommerceapp.dtos.SellerAdminApiDto;
+import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
 import com.springbootcamp.ecommerceapp.entities.Seller;
-import com.springbootcamp.ecommerceapp.repos.CustomerRepository;
 import com.springbootcamp.ecommerceapp.repos.SellerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class SellerService {
@@ -27,10 +29,15 @@ public class SellerService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public Seller convertToSeller(SellerDto sellr){
-        Seller seller = modelMapper.map(sellr, Seller.class);
-        System.out.println("object converted");
+    public Seller toSeller(SellerRegistrationDto sellerDto){
+        Seller seller = modelMapper.map(sellerDto, Seller.class);
         return seller;
+    }
+
+    public SellerAdminApiDto toSellerAdminApiDto(Seller seller){
+        SellerAdminApiDto sellerAdminApiDto = modelMapper.map(seller, SellerAdminApiDto.class);
+        sellerAdminApiDto.setFullName(seller.getFirstName(), seller.getMiddleName(), seller.getLastName());
+        return sellerAdminApiDto;
     }
 
     public boolean isEmailUnique(String email){
@@ -56,14 +63,14 @@ public class SellerService {
         return true;
     }
 
-    public String getUniquenessStatus(SellerDto sellerDto){
-        if(!isEmailUnique(sellerDto.getEmail()))
+    public String getUniquenessStatus(SellerRegistrationDto sellerRegistrationDto){
+        if(!isEmailUnique(sellerRegistrationDto.getEmail()))
             return "Email id already exists";
 
-        else if(!isGSTUnique(sellerDto.getGST()))
+        else if(!isGSTUnique(sellerRegistrationDto.getGST()))
             return "GST already exists";
 
-        else if(!isCompanyNameUnique(sellerDto.getCompanyName()))
+        else if(!isCompanyNameUnique(sellerRegistrationDto.getCompanyName()))
             return "Company Name already exists";
 
         return "unique";
@@ -83,4 +90,22 @@ public class SellerService {
         mailSender.send(email);
     }
 
+    public List<SellerAdminApiDto> getAllSellers(String offset, String size, String field) {
+        Integer pageNo = Integer.parseInt(offset);
+        Integer pageSize = Integer.parseInt(size);
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(field).ascending());
+
+        List<Seller> sellers = sellerRepository.findAll(pageable);
+        List<SellerAdminApiDto> sellerAdminApiDtos = new ArrayList<>();
+
+        sellers.forEach((seller)-> sellerAdminApiDtos.add(toSellerAdminApiDto(seller)));
+        return sellerAdminApiDtos;
+    }
+
+    public SellerAdminApiDto getSellerByEmail(String email) {
+        Seller seller = sellerRepository.findByEmail(email);
+        SellerAdminApiDto sellerAdminApiDto = toSellerAdminApiDto(seller);
+        return sellerAdminApiDto;
+    }
 }

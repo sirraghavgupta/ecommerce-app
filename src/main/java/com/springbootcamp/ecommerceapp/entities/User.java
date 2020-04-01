@@ -17,15 +17,18 @@ public class User {
     private String firstName;
     private String middleName;
     private String lastName;
+
     private String password;
 
-    private boolean isDeleted;
-    private boolean isActive;
-    private boolean isExpired;
-    private boolean isLocked;
+    private boolean isDeleted = false;
+
+    private boolean isActive = false;
+
+    private boolean isExpired = false;
+
+    private boolean isLocked = false;
 
     private Integer loginStatus=0;
-
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -33,17 +36,9 @@ public class User {
                inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
 
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Address> addresses;
 
-
-    {
-        isActive = false;
-        isDeleted = false;
-        isExpired = false;
-        isLocked = false;
-    }
 
     public User() {
     }
@@ -107,6 +102,10 @@ public class User {
         return isDeleted;
     }
 
+    public boolean getDeleted() {
+        return isDeleted;
+    }
+
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
     }
@@ -123,11 +122,19 @@ public class User {
         return isExpired;
     }
 
+    public boolean getExpired() {
+        return isExpired;
+    }
+
     public void setExpired(boolean expired) {
         isExpired = expired;
     }
 
     public boolean isLocked() {
+        return isLocked;
+    }
+
+    public boolean getLocked() {
         return isLocked;
     }
 

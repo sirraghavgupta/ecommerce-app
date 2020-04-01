@@ -1,8 +1,8 @@
 package com.springbootcamp.ecommerceapp.controllers;
 
-import com.springbootcamp.ecommerceapp.Exception.EmailAlreadyExistsException;
-import com.springbootcamp.ecommerceapp.dtos.CustomerDto;
-import com.springbootcamp.ecommerceapp.dtos.SellerDto;
+import com.springbootcamp.ecommerceapp.exception.EmailAlreadyExistsException;
+import com.springbootcamp.ecommerceapp.dtos.CustomerRegistrationDto;
+import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
 import com.springbootcamp.ecommerceapp.entities.Customer;
 import com.springbootcamp.ecommerceapp.entities.Seller;
 import com.springbootcamp.ecommerceapp.entities.User;
@@ -17,7 +17,6 @@ import com.springbootcamp.ecommerceapp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
@@ -57,7 +56,7 @@ public class RegistrationController {
     ApplicationEventPublisher eventPublisher;
 
     @PostMapping("/register/customer")
-    public String registerCustomer(@Valid @RequestBody CustomerDto cust, WebRequest request){
+    public String registerCustomer(@Valid @RequestBody CustomerRegistrationDto cust, WebRequest request){
 
         Customer customer = customerRepository.findByEmail(cust.getEmail());
 
@@ -66,7 +65,7 @@ public class RegistrationController {
 //            throw new UserAlreadyExistAuthenticationException();
 
         else{
-            Customer newCustomer = customerService.convertToCustomer(cust);
+            Customer newCustomer = customerService.toCustomer(cust);
             Customer savedCustomer = customerRepository.save(newCustomer);
             System.out.println("customer registered successfully.");
 
@@ -127,6 +126,9 @@ public class RegistrationController {
             return messages.getMessage("ValidEmail.user.email", null, locale);
 
         VerificationToken token = userService.getVerificationToken(user);
+        if(token==null)
+            return "user already activated";
+
         userService.deleteVerificationToken(token.getToken());
         eventPublisher.publishEvent(new ActivationEmailFireEvent(appUrl, locale, user));
         return messages.getMessage("message.resendToken", null, locale);
@@ -135,13 +137,13 @@ public class RegistrationController {
 
 
     @PostMapping("/register/seller")
-    public String registerSeller(@Valid @RequestBody SellerDto sellerDto){
+    public String registerSeller(@Valid @RequestBody SellerRegistrationDto sellerRegistrationDto){
 
-        String message = sellerService.getUniquenessStatus(sellerDto);
+        String message = sellerService.getUniquenessStatus(sellerRegistrationDto);
         if(!message.equals("unique"))
             return message;
 
-        Seller seller = sellerService.convertToSeller(sellerDto);
+        Seller seller = sellerService.toSeller(sellerRegistrationDto);
         sellerRepository.save(seller);
         sellerService.sendAcknowledgementMail(seller.getEmail());
         return "success";

@@ -47,7 +47,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Override
     public void configure(final AuthorizationServerEndpointsConfigurer endpoints) {
         endpoints.tokenStore(tokenStore()).userDetailsService(userDetailsService)
-//                .authenticationManager(authenticationManager)
+                .authenticationManager(authenticationManager)
                 .accessTokenConverter(accessTokenConverter())
         ;
 

@@ -1,4 +1,4 @@
-package com.springbootcamp.ecommerceapp.Exception;
+package com.springbootcamp.ecommerceapp.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

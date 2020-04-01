@@ -1,7 +1,8 @@
 package com.springbootcamp.ecommerceapp.validators;
 
-import com.springbootcamp.ecommerceapp.dtos.CustomerDto;
-import com.springbootcamp.ecommerceapp.dtos.UserDto;
+import com.springbootcamp.ecommerceapp.dtos.CustomerRegistrationDto;
+import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
+import com.springbootcamp.ecommerceapp.dtos.UserRegistrationDto;
 import com.springbootcamp.ecommerceapp.entities.Customer;
 
 import javax.validation.ConstraintValidator;
@@ -15,7 +16,13 @@ public class PasswordMatchesValidator
     }
     @Override
     public boolean isValid(Object obj, ConstraintValidatorContext context){
-        UserDto user = (UserDto) obj;
-        return user.getPassword().equals(user.getConfirmPassword());
+
+        if(obj instanceof SellerRegistrationDto){
+            SellerRegistrationDto seller = (SellerRegistrationDto) obj;
+            return seller.getPassword().equals(seller.getConfirmPassword());
+        }
+
+        CustomerRegistrationDto customer = (CustomerRegistrationDto) obj;
+        return customer.getPassword().equals(customer.getConfirmPassword());
     }
 }

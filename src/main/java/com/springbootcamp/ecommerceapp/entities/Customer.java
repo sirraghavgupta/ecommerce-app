@@ -1,5 +1,7 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,7 +11,6 @@ import java.util.List;
 public class Customer extends User{
 
     private String contact;
-
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<ProductReview> reviews;

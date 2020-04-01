@@ -1,16 +1,13 @@
 package com.springbootcamp.ecommerceapp.dtos;
 
-import com.springbootcamp.ecommerceapp.validators.PasswordMatches;
-import com.springbootcamp.ecommerceapp.validators.ValidEmail;
 import com.springbootcamp.ecommerceapp.validators.ValidGST;
-import com.springbootcamp.ecommerceapp.validators.ValidPassword;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-//@PasswordMatches
-public class SellerDto extends UserDto{
+
+public class SellerRegistrationDto extends UserRegistrationDto {
 
 
     @NotNull
@@ -29,17 +26,6 @@ public class SellerDto extends UserDto{
     private String companyContact;
 
 
-    public SellerDto() {
-    }
-
-    public SellerDto(@NotNull @NotEmpty String email, @NotNull @NotEmpty String password,
-                     @NotNull @NotEmpty String confirmPassword, @NotNull @NotEmpty @Size(min = 15, max = 15) String GST,
-                     @NotNull @NotEmpty String companyName, @NotNull @NotEmpty @Size(min = 10, max = 10) String companyContact) {
-        super(email, password, confirmPassword);
-        this.GST = GST;
-        this.companyName = companyName;
-        this.companyContact = companyContact;
-    }
 
     public String getGST() {
         return GST;

@@ -8,7 +8,18 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @PasswordMatches
-public class UserDto {
+public class UserRegistrationDto {
+
+
+    @NotNull
+    @NotEmpty
+    private String firstName;
+
+    private String middleName;
+
+    @NotNull
+    @NotEmpty
+    private String lastName;
 
     @NotNull
     @NotEmpty
@@ -24,13 +35,30 @@ public class UserDto {
     @NotEmpty
     private String confirmPassword;
 
-    public UserDto() {
+
+
+    public String getFirstName() {
+        return firstName;
     }
 
-    public UserDto(@NotNull @NotEmpty String email, @NotNull @NotEmpty String password, @NotNull @NotEmpty String confirmPassword) {
-        this.email = email;
-        this.password = password;
-        this.confirmPassword = confirmPassword;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {

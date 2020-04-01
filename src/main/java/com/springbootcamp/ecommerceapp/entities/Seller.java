@@ -1,6 +1,6 @@
 package com.springbootcamp.ecommerceapp.entities;
 
-import sun.text.UCompactIntArray;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -12,7 +12,6 @@ public class Seller extends User{
     private String GST;
     private String companyName;
     private String companyContact;
-
 
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     private Set<Product> products;
