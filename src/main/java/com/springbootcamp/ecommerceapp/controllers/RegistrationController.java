@@ -23,6 +23,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.Valid;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 @RestController
@@ -62,7 +63,6 @@ public class RegistrationController {
 
         if(customer != null)
             throw new EmailAlreadyExistsException("email id already exists");
-//            throw new UserAlreadyExistAuthenticationException();
 
         else{
             Customer newCustomer = customerService.toCustomer(cust);
@@ -84,7 +84,6 @@ public class RegistrationController {
 
     @GetMapping("/activate/customer")
     public String activateCustomer(@RequestParam("token") String token, WebRequest request){
-
         Locale locale = request.getLocale();
 
         // if token doesnt exist in database
@@ -116,8 +115,8 @@ public class RegistrationController {
     }
 
 
-    @GetMapping("/resend-activation-link/customer")
-    public String resendActivationLink(@RequestParam("email") String email, WebRequest request){
+    @PostMapping("/resend-activation-link/customer")
+    public String resendActivationLink(@RequestBody String email, WebRequest request){
         User user = userRepository.findByEmail(email);
         String appUrl = request.getContextPath();
         Locale locale = request.getLocale();
@@ -133,7 +132,6 @@ public class RegistrationController {
         eventPublisher.publishEvent(new ActivationEmailFireEvent(appUrl, locale, user));
         return messages.getMessage("message.resendToken", null, locale);
     }
-
 
 
     @PostMapping("/register/seller")

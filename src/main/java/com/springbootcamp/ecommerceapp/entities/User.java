@@ -193,10 +193,16 @@ public class User {
     }
 
     public void setLoginStatus(boolean success){
-        if(success)
+        if(success) {
             loginStatus = 1;
-        else
+            this.setLocked(false);
+        }
+        else {
             loginStatus--;
+            if(loginStatus <= -2){
+                setLocked(true);
+            }
+        }
     }
 
     public Integer getLoginStatus() {
