@@ -1,6 +1,5 @@
 package com.springbootcamp.ecommerceapp.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
@@ -20,37 +19,24 @@ public class Product {
     private String description;
     private String brand;
 
-    private boolean isReturnable;
-    private boolean isCancelleable;
-    private boolean isActive;
-    private boolean isDeleted;
+    private boolean isReturnable =true;
+    private boolean isCancelleable = true;
+    private boolean isActive = true;
+    private boolean isDeleted = false;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "seller_user_id")
     private Seller seller;
 
-
-    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private Set<ProductVariation> variations;
 
-    @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")
     private Category category;
 
-
-    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductReview> reviews;
-
-    {
-        isActive = true;
-        isCancelleable = true;
-        isReturnable = true;
-        isDeleted = false;
-    }
 
     public Product(){
     }

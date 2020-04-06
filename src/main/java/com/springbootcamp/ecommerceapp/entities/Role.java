@@ -15,11 +15,21 @@ public class Role implements GrantedAuthority {
 //    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
+    private boolean isDeleted = false;
+
     @Column(unique = true)
     private String authority;
 
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 
     Role(){
 

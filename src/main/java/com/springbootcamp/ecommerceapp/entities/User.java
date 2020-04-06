@@ -21,11 +21,8 @@ public class User {
     private String password;
 
     private boolean isDeleted = false;
-
     private boolean isActive = false;
-
     private boolean isExpired = false;
-
     private boolean isLocked = false;
 
     private Integer loginStatus=0;

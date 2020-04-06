@@ -1,6 +1,7 @@
 package com.springbootcamp.ecommerceapp.repos;
 
 import com.springbootcamp.ecommerceapp.entities.Product;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

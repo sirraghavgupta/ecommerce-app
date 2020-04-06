@@ -14,6 +14,8 @@ public class ProductVariation {
     private String primaryImageName;
     private String metadata;
 
+    private boolean isDeleted = false;
+
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -73,6 +75,14 @@ public class ProductVariation {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     @Override

@@ -13,6 +13,8 @@ public class Category {
 
     private String name;
 
+    private boolean isDeleted = false;
+
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private Set<Product> products;
@@ -72,6 +74,14 @@ public class Category {
 
     public void setParentCategory(Category parentCategory) {
         this.parentCategory = parentCategory;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public void addSubCategory(Category category){

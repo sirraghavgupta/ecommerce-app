@@ -12,6 +12,7 @@ public class ProductReview {
     private String review;
     private Double rating;
 
+    private boolean isDeleted = false;
 
     @ManyToOne
     @JoinColumn(name = "customer_user_id")
@@ -68,6 +69,14 @@ public class ProductReview {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     @Override

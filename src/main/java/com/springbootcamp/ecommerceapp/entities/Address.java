@@ -1,9 +1,6 @@
 package com.springbootcamp.ecommerceapp.entities;
 
 import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 public class Address {
@@ -12,12 +9,14 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String address;
+    private String addressLine;
     private String city;
     private String state;
     private String zipCode;
     private String country;
     private String label;
+
+    private boolean isDeleted = false;
 
     @ManyToOne
     @JoinColumn(name = "customer_user_id")
@@ -26,8 +25,8 @@ public class Address {
     public Address() {
     }
 
-    public Address(String address, String city, String state, String zipCode, String country, String label) {
-        this.address = address;
+    public Address(String addressLine, String city, String state, String zipCode, String country, String label) {
+        this.addressLine = addressLine;
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
@@ -67,12 +66,12 @@ public class Address {
         this.country = country;
     }
 
-    public String getAddress() {
-        return address;
+    public String getAddressLine() {
+        return addressLine;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setAddressLine(String addressLine) {
+        this.addressLine = addressLine;
     }
 
     public String getZipCode() {
@@ -99,6 +98,14 @@ public class Address {
         this.user = user;
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
     @Override
     public String toString() {
         return "Address{" +
@@ -106,7 +113,7 @@ public class Address {
                 ", city='" + city + '\'' +
                 ", state='" + state + '\'' +
                 ", country='" + country + '\'' +
-                ", address='" + address + '\'' +
+                ", address='" + addressLine + '\'' +
                 ", zipCode='" + zipCode + '\'' +
                 ", label='" + label + '\'' +
                 '}';
