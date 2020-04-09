@@ -3,6 +3,8 @@ package com.springbootcamp.ecommerceapp.dtos;
 import com.springbootcamp.ecommerceapp.validators.PasswordMatches;
 import com.springbootcamp.ecommerceapp.validators.ValidEmail;
 import com.springbootcamp.ecommerceapp.validators.ValidPassword;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;

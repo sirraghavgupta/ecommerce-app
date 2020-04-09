@@ -27,7 +27,7 @@ public class SellerService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private EmailService emailService;
 
     public Seller toSeller(SellerRegistrationDto sellerDto){
         Seller seller = modelMapper.map(sellerDto, Seller.class);
@@ -76,18 +76,11 @@ public class SellerService {
         return "unique";
     }
 
-
-    @Async
     public void sendAcknowledgementMail(String emailAddress){
 
         String subject = "Registration Confirmation";
         String message = "your account has been created and is pending for approval by our team. ";
-
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setTo(emailAddress);
-        email.setSubject(subject);
-        email.setText(message);
-        mailSender.send(email);
+        emailService.sendEmail(emailAddress, subject, message);
     }
 
     public List<SellerAdminApiDto> getAllSellers(String offset, String size, String field) {

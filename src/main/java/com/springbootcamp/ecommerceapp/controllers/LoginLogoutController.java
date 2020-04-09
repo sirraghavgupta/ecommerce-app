@@ -4,7 +4,6 @@ import com.springbootcamp.ecommerceapp.dtos.ForgotPassword;
 import com.springbootcamp.ecommerceapp.entities.ForgotPasswordToken;
 import com.springbootcamp.ecommerceapp.entities.User;
 import com.springbootcamp.ecommerceapp.entities.VerificationToken;
-import com.springbootcamp.ecommerceapp.events.ActivationEmailFireEvent;
 import com.springbootcamp.ecommerceapp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -60,7 +59,7 @@ public class LoginLogoutController {
 
         Locale locale = request.getLocale();
 
-        // if token doesnt exist in database
+        // if token doesn't exist in database
         ForgotPasswordToken forgotPasswordToken = userService.getForgotPasswordToken(token);
         if (forgotPasswordToken == null) {
             return messages.getMessage("auth.message.invalidToken", null, locale);
@@ -79,8 +78,10 @@ public class LoginLogoutController {
         user.setPassword(passwords.getPassword());
         userService.saveRegisteredUser(user);
         userService.deleteForgotPasswordToken(token);
-        return "password changed successfully";
 
-        // password reset mail sending feature to be implemented later.
+        // logout the user of all active sessions, if any - delete the oAuth token
+        userService.logoutUser(user.getEmail(), request);
+        userService.sendPasswordResetConfirmationMail(user.getEmail());
+        return "password changed successfully";
     }
 }

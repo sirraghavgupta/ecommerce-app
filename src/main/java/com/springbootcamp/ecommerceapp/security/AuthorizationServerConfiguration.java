@@ -50,7 +50,6 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .authenticationManager(authenticationManager)
                 .accessTokenConverter(accessTokenConverter())
         ;
-
     }
 
     @Bean

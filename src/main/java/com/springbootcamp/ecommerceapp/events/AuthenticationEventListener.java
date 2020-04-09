@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.constraints.Null;
 import java.util.LinkedHashMap;
@@ -26,7 +27,7 @@ public class AuthenticationEventListener {
 
         try{
             User user = userService.getUserByEmail(userEmail);
-            user.setLoginStatus(false);
+            userService.registerUnsuccessfulLogin(user);
             userService.saveRegisteredUser(user);
         }catch(NullPointerException ex){
             System.out.println("##### - exception caught = " + ex);
@@ -66,7 +67,7 @@ public class AuthenticationEventListener {
         System.out.println(user);
         try{
             System.out.println(user.getFirstName());
-            user.setLoginStatus(true);
+            userService.registerSuccessfulLogin(user);
             System.out.println("value set");
             userService.saveRegisteredUser(user);
             System.out.println("user saved successfully ");

@@ -11,6 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 public class Bootstrap implements ApplicationRunner {
 
@@ -24,13 +27,13 @@ public class Bootstrap implements ApplicationRunner {
     ProductRepository productRepository;
 
     @Autowired
+    ProductVariationRepository productVariationRepository;
+
+    @Autowired
     CategoryRepository categoryRepository;
 
     @Autowired
     ProductReviewRepository productReviewRepository;
-
-    @Autowired
-    ProductVariationRepository productVariationRepository;
 
     @Autowired
     UserDao userDao;
@@ -86,6 +89,7 @@ public class Bootstrap implements ApplicationRunner {
             System.out.println("Total users saved::"+userRepository.count());
 
 
+
             Product product1 = new Product("UCB T-Shirt", "very attractive and comfortable", "UCB");
 //            Product product2 = new Product("RedTape Jeans", "slim fit", "RedTape");
 //            Product product3 = new Product("Nike shoes", "light weight", "Nike");
@@ -105,9 +109,19 @@ public class Bootstrap implements ApplicationRunner {
 
 
             ProductVariation mSize = new ProductVariation(5, 1500d);
-            mSize.setMetadata("M - size");
+            Map<String, Object> attributes1= new HashMap<>();
+            attributes1.put("size", "M-Size");
+            attributes1.put("gender", "female");
+            mSize.setProductAttributes(attributes1);
+
             ProductVariation lSize = new ProductVariation(3, 1600d);
-            lSize.setMetadata("L - size");
+            Map<String, Object> attributes2= new HashMap<>();
+            attributes2.put("size", "L-Size");
+            attributes2.put("gender", "male");
+            lSize.setProductAttributes(attributes2);
+
+
+
 
             product1.setCategory(men);
             product1.addVariation(mSize);
@@ -124,6 +138,12 @@ public class Bootstrap implements ApplicationRunner {
             product1.addReview(review2);
 
             productRepository.save(product1);
+
+            ProductVariation var = productVariationRepository.findById(17L).get();
+            Map<String, Object> attributes = var.getProductAttributes();
+            System.out.println(attributes.keySet());
+
+
         }
     }
 }

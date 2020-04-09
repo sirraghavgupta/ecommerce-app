@@ -25,7 +25,7 @@ public class User {
     private boolean isExpired = false;
     private boolean isLocked = false;
 
-    private Integer loginStatus=0;
+    private Integer failedAttempts = 0;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -155,6 +155,14 @@ public class User {
         this.addresses = addresses;
     }
 
+    public Integer getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = failedAttempts;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -183,26 +191,12 @@ public class User {
     }
 
     public void addRole(Role role){
-        if(roles==null)
-            roles = new HashSet<>();
+        if(role!=null){
+            if(roles==null)
+                roles = new HashSet<>();
 
-        roles.add(role);
-    }
-
-    public void setLoginStatus(boolean success){
-        if(success) {
-            loginStatus = 1;
-            this.setLocked(false);
-        }
-        else {
-            loginStatus--;
-            if(loginStatus <= -2){
-                setLocked(true);
-            }
+            roles.add(role);
         }
     }
 
-    public Integer getLoginStatus() {
-        return loginStatus;
-    }
 }

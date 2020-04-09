@@ -1,19 +1,21 @@
 package com.springbootcamp.ecommerceapp.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Entity
 public class Customer extends User{
 
     private String contact;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductReview> reviews;
+
+//    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+//    private Set<Order> orders;
 
 
     public Customer(){
@@ -42,6 +44,14 @@ public class Customer extends User{
         this.reviews = reviews;
     }
 
+//    public Set<Order> getOrders() {
+//        return orders;
+//    }
+//
+//    public void setOrders(Set<Order> orders) {
+//        this.orders = orders;
+//    }
+
     public void addReview(ProductReview review){
         if(review != null){
             if(reviews == null)
@@ -60,5 +70,15 @@ public class Customer extends User{
                 "contact='" + contact + '\'' +
                 '}';
     }
+
+//    public void addOrder(Order order){
+//        if(order!=null){
+//            if(orders==null){
+//                orders = new LinkedHashSet<>();
+//            }
+//            orders.add(order);
+//            order.setCustomer(this);
+//        }
+//    }
 
 }

@@ -1,6 +1,11 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import com.springbootcamp.ecommerceapp.utils.HashMapConverter;
+
 import javax.persistence.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 public class ProductVariation {
@@ -12,14 +17,20 @@ public class ProductVariation {
     private Integer quantityAvailable;
     private Double price;
     private String primaryImageName;
-    private String metadata;
+
+    @Convert(converter = HashMapConverter.class)
+    private Map<String, Object> productAttributes;
 
     private boolean isDeleted = false;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id")
     private Product product;
+
+
+//    @OneToMany(mappedBy = "productVariation", fetch = FetchType.EAGER)
+//    private Set<OrderProduct> orderedProducts;
 
     public ProductVariation() {
     }
@@ -61,12 +72,12 @@ public class ProductVariation {
         this.primaryImageName = primaryImageName;
     }
 
-    public String getMetadata() {
-        return metadata;
+    public Map<String, Object> getProductAttributes() {
+        return productAttributes;
     }
 
-    public void setMetadata(String metadata) {
-        this.metadata = metadata;
+    public void setProductAttributes(Map<String, Object> productAttributes) {
+        this.productAttributes = productAttributes;
     }
 
     public Product getProduct() {
@@ -85,6 +96,14 @@ public class ProductVariation {
         isDeleted = deleted;
     }
 
+//    public Set<OrderProduct> getOrderedProducts() {
+//        return orderedProducts;
+//    }
+
+//    public void setOrderedProducts(Set<OrderProduct> orderedProducts) {
+//        this.orderedProducts = orderedProducts;
+//    }
+
     @Override
     public String toString() {
         return "ProductVariation{" +
@@ -92,7 +111,18 @@ public class ProductVariation {
                 ", quantityAvailable=" + quantityAvailable +
                 ", price=" + price +
                 ", primaryImageName='" + primaryImageName + '\'' +
-                ", metadata='" + metadata + '\'' +
+                ", productAttributes=" + productAttributes +
+                ", isDeleted=" + isDeleted +
                 '}';
     }
+
+
+//    public void addOrderProduct(OrderProduct orderProduct){
+//        if(orderProduct != null){
+//            if(orderedProducts == null)
+//                orderedProducts = new LinkedHashSet<>();
+//            orderedProducts.add(orderProduct);
+//            orderProduct.setProductVariation(this);
+//        }
+//    }
 }
