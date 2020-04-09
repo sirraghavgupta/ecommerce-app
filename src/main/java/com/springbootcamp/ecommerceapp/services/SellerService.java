@@ -98,6 +98,8 @@ public class SellerService {
 
     public SellerAdminApiDto getSellerByEmail(String email) {
         Seller seller = sellerRepository.findByEmail(email);
+        if(seller==null)
+            return null;
         SellerAdminApiDto sellerAdminApiDto = toSellerAdminApiDto(seller);
         return sellerAdminApiDto;
     }

@@ -1,14 +1,20 @@
 package com.springbootcamp.ecommerceapp.services;
 
 import com.springbootcamp.ecommerceapp.dtos.CustomerRegistrationDto;
+import com.springbootcamp.ecommerceapp.dtos.ForgotPassword;
 import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.exception.EmailAlreadyExistsException;
 import com.springbootcamp.ecommerceapp.repos.*;
+import com.springbootcamp.ecommerceapp.utils.ErrorVO;
+import com.springbootcamp.ecommerceapp.utils.ResponseVO;
+import com.springbootcamp.ecommerceapp.utils.VO;
 import com.springbootcamp.ecommerceapp.validators.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,9 +61,6 @@ public class UserService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
-
-    @Autowired
-    ApplicationEventPublisher eventPublisher;
 
     @Autowired
     EmailValidator emailValidator;
@@ -107,81 +108,98 @@ public class UserService {
         forgotPasswordRepository.delete(forgotPasswordToken);
     }
 
-    public void saveRegisteredUser(final User user) {
-        userRepository.save(user);
-    }
+//    public int checkVerificationTokenValidity(String token){
+//        VerificationToken verificationToken = getVerificationToken(token);
+//        if (verificationToken == null) {
+//            // token not found.
+//            return 0;
+//        }
+//
+//        User user = verificationToken.getUser();
+//        Calendar cal = Calendar.getInstance();
+//        if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+//            // token expired.
+//            return -1;
+//        }
+//        return 1;
+//    }
 
     User getUser(String verificationToken){
         VerificationToken token = verificationTokenRepository.findByToken(verificationToken);
         return token.getUser();
     }
 
+    public void saveRegisteredUser(final User user) {
+        userRepository.save(user);
+    }
+
     // activate any user - customer or seller
-    public String activateUserById(Long id, WebRequest request) {
+    public ResponseEntity<VO> activateUserById(Long id, WebRequest request) {
         Optional<User> user = userRepository.findById(id);
-        String message;
+        ResponseEntity<VO> responseEntity;
+        VO response;
+        String message, error;
+
         if(!user.isPresent()){
-            message = "user not found";
+            error = "No resource found";
+            message = "No user found with this Id";
+            response = new ErrorVO(error, message, new Date());
+            responseEntity = new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
         else{
             User savedUser = user.get();
             if(savedUser.isActive()){
-                message = "user already active";
+                message = "User already active";
             }
             else{
                 savedUser.setActive(true);
                 userRepository.save(savedUser);
-                Locale locale = request.getLocale();
+//                Locale locale = request.getLocale();
                 String subject = "Account Activation";
-                message = "your account has been activated.";
-                emailService.sendEmail(savedUser.getEmail(), subject, message);
+                String emailMessage = "Your account has been activated successfully by our team.";
+                emailService.sendEmail(savedUser.getEmail(), subject, emailMessage);
+
+                message = "User has been activated";
             }
+            response = new ResponseVO<>(null, message, new Date());
+            responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
         }
-        return message;
+        return responseEntity;
     }
 
     // de-activate any user - customer or seller
-    public String deactivateUserById(Long id, WebRequest request) {
+    public ResponseEntity<VO> deactivateUserById(Long id, WebRequest request) {
         Optional<User> user = userRepository.findById(id);
-        String message;
+        ResponseEntity<VO> responseEntity;
+        VO response;
+        String message, error;
+
         if(!user.isPresent()){
-            message = "user not found";
+            error = "No resource found";
+            message = "No user found with this Id";
+            response = new ErrorVO(error, message, new Date());
+            responseEntity = new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
         else{
             User savedUser = user.get();
             if(!savedUser.isActive()){
-                message = "user already inactive";
+                message = "User already inactive";
             }
             else{
                 savedUser.setActive(false);
                 userRepository.save(savedUser);
-                Locale locale = request.getLocale();
-                message = "your account has been de-activated.";
+//                Locale locale = request.getLocale();
+
+                String emailMessage = "your account has been de-activated.";
                 String subject = "Account De-activation";
-                emailService.sendEmail(savedUser.getEmail(), subject, message);
+                emailService.sendEmail(savedUser.getEmail(), subject, emailMessage);
+
+                message = "User has been deactivated.";
             }
+            response = new ResponseVO<>(null, message, new Date());
+            responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
         }
-        return message;
-    }
-
-    public String initiatePasswordReset(String email, WebRequest request){
-        String message;
-
-        // check uniqueness of email
-        User user = userRepository.findByEmail(email);
-        if(user==null)
-            throw new UsernameNotFoundException("this email address doesn't exist");
-
-        else if(!user.isActive() || user.isLocked())
-            message = "user is either de-activated or locked";
-
-        // user is activated - eligible for this operation.
-        else{
-            String token =createForgotPasswordToken(user);
-            sendForgotPasswordInitiationMail(user, token);
-            message = messages.getMessage("message.resendToken", null, request.getLocale());
-        }
-        return message;
+        return responseEntity;
     }
 
     public boolean isValidEmail(String email){
@@ -242,7 +260,7 @@ public class UserService {
                 "/activate/customer?token=" + token;
 
 //        String message = messages.getMessage("message.regSucc", null, locale);
-        String message = "please activate your account";
+        String message = "please activate your account \r\n" + confirmationUrl;
         System.out.println(confirmationUrl);
 
         // populate the email and send
@@ -267,30 +285,180 @@ public class UserService {
         emailService.sendEmail(email, subject, message);
     }
 
-    public String createNewCustomer(CustomerRegistrationDto customerDto, WebRequest request){
+    public ResponseEntity<VO> initiatePasswordReset(String email, WebRequest request){
+        String message, error;
+        VO response;
+
+        // check uniqueness of email
+        User user = userRepository.findByEmail(email);
+        if(user==null)
+            throw new UsernameNotFoundException("This email address does not exist.");
+
+        else if(!user.isActive() || user.isLocked()) {
+            message = "User is either de-activated or locked";
+            error = "Operation not allowed";
+            response = new ErrorVO(error, message, new Date());
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        }
+
+        // user is activated - eligible for this operation.
+        String token =createForgotPasswordToken(user);
+        sendForgotPasswordInitiationMail(user, token);
+        message = messages.getMessage("message.resetPasswordEmail", null, request.getLocale());
+        response = new ResponseVO<String>(null, message, new Date());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> createNewCustomer(CustomerRegistrationDto customerDto, WebRequest request){
         Customer customer = customerRepository.findByEmail(customerDto.getEmail());
 
         if(customer != null)
             throw new EmailAlreadyExistsException("email id already exists");
 
         Customer newCustomer = customerService.toCustomer(customerDto);
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+        newCustomer.setPassword(passwordEncoder.encode(newCustomer.getPassword()));
         Customer savedCustomer = customerRepository.save(newCustomer);
-        System.out.println("customer registered successfully.");
+
         String appUrl = request.getContextPath();
         sendActivationLinkMail(appUrl, savedCustomer, request.getLocale(), "Registration Confirmation");
-        return "success";
+
+        String message = "Account created successfully. An activation mail has been sent to your email id.";
+        VO response = new ResponseVO<>(null, message, new Date());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    public String createNewSeller(SellerRegistrationDto sellerRegistrationDto) {
+    public ResponseEntity<VO> createNewSeller(SellerRegistrationDto sellerRegistrationDto) {
         String message = sellerService.getUniquenessStatus(sellerRegistrationDto);
-        if(!message.equals("unique"))
-            return message;
+        String error;
+        VO response;
+        if(!message.equals("unique")){
+            error = "Invalid attributes.";
+            response = new ErrorVO(error, message, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+        }
 
         Seller seller = sellerService.toSeller(sellerRegistrationDto);
         seller.setPassword(passwordEncoder.encode(seller.getPassword()));
         sellerRepository.save(seller);
         sellerService.sendAcknowledgementMail(seller.getEmail());
-        return "success";
+
+        message = "Account created successfully. It will be activated after verification.";
+        response = new ResponseVO<>(null, message, new Date());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<VO> resendActivationLink(String email, WebRequest request) {
+        User user = userRepository.findByEmail(email);
+        String appUrl = request.getContextPath();
+        Locale locale = request.getLocale();
+        String error, message;
+        VO response;
+
+        if(user==null){
+            error = messages.getMessage("ValidEmail.user.email", null, locale);
+            message = "No user found with this email address.";
+            response = new ErrorVO(error, message, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        VerificationToken token = getVerificationToken(user);
+        if(token==null){
+            message = "User already activated";
+            response = new ResponseVO<String>(null, message, new Date());
+        }
+
+        deleteVerificationToken(token.getToken());
+        sendActivationLinkMail(appUrl, user, locale, "Account Activation Link");
+        message = messages.getMessage("message.resendToken", null, locale);
+        response = new ResponseVO<String>(null, message, new Date());
+
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> activateUserByToken(String token, WebRequest request){
+        Locale locale = request.getLocale();
+        String message;
+        String error;
+        VO response;
+
+        // if token doesn't exist in database
+        VerificationToken verificationToken = getVerificationToken(token);
+        if (verificationToken == null) {
+            error = messages.getMessage("auth.message.invalidToken", null, locale);
+            message = "No user found with given token.";
+            response = new ErrorVO(error, message, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        // if token is expired
+        User user = verificationToken.getUser();
+        Calendar cal = Calendar.getInstance();
+        if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+
+            error = messages.getMessage("auth.message.expired", null, locale);
+            message = "Your activation link has been expired. We have sent a net link to your " +
+                    "registered email.";
+            response = new ErrorVO(error, message, new Date());
+
+            String appUrl = request.getContextPath();
+            deleteVerificationToken(token);
+            sendActivationLinkMail(appUrl, user, locale, "Account Activation Link");
+
+            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        // if everything is alright
+        if(user.isActive()){
+            message = "Your account is already active";
+            response = new ResponseVO<String>(null, message, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.OK);
+        }
+
+        user.setActive(true);
+        saveRegisteredUser(user);
+        deleteVerificationToken(token);
+        message = "you have been activated successfully";
+        response = new ResponseVO<String>(null, message, new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> resetPassword(String token, ForgotPassword passwords, WebRequest request){
+        Locale locale = request.getLocale();
+        String message, error;
+        VO response;
+
+        // if token doesn't exist in database
+        ForgotPasswordToken forgotPasswordToken = getForgotPasswordToken(token);
+        if (forgotPasswordToken == null) {
+            error = messages.getMessage("auth.message.invalidToken", null, locale);
+            message = "The token provided by you doesn't correspond to any user.";
+            response = new ErrorVO(error, message, new Date());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        // if token is expired
+        User user = forgotPasswordToken.getUser();
+        Calendar cal = Calendar.getInstance();
+        if ((forgotPasswordToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+
+            String appUrl = request.getContextPath();
+            deleteForgotPasswordToken(token);
+            error = "Token expired.";
+            message = messages.getMessage("auth.message.expired", null, locale);
+            response = new ErrorVO(error, message, new Date());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(passwords.getPassword());
+        saveRegisteredUser(user);
+        deleteForgotPasswordToken(token);
+
+        // logout the user of all active sessions, if any - delete the oAuth token
+        logoutUser(user.getEmail(), request);
+        sendPasswordResetConfirmationMail(user.getEmail());
+        message = "Password changed successfully.";
+        response = new ResponseVO<>(null, message, new Date());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

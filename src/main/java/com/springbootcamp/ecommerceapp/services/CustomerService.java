@@ -5,6 +5,7 @@ import com.springbootcamp.ecommerceapp.dtos.CustomerRegistrationDto;
 import com.springbootcamp.ecommerceapp.dtos.SellerAdminApiDto;
 import com.springbootcamp.ecommerceapp.entities.Customer;
 import com.springbootcamp.ecommerceapp.repos.CustomerRepository;
+import com.springbootcamp.ecommerceapp.utils.VO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -34,9 +35,9 @@ public class CustomerService {
 //        }
 //    }
 
-    public Customer toCustomer(CustomerRegistrationDto cust){
-        Customer customer = modelMapper.map(cust, Customer.class);
-        return customer;
+    public Customer toCustomer(CustomerRegistrationDto customerDto){
+        System.out.println("called to customer");
+        return modelMapper.map(customerDto, Customer.class);
     }
 
     public CustomerAdminApiDto toCustomerAdminApiDto(Customer customer){
@@ -61,6 +62,8 @@ public class CustomerService {
 
     public CustomerAdminApiDto getCustomerByEmail(String email){
         Customer customer = customerRepository.findByEmail(email);
+        if(customer==null)
+            return null;
         CustomerAdminApiDto customerAdminApiDto = toCustomerAdminApiDto(customer);
         return customerAdminApiDto;
     }
