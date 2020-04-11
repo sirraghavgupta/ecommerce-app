@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,8 +16,11 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableAuthorizationServer
@@ -30,6 +34,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     @Autowired
     UserDetailsService userDetailsService;
+
+//    @Autowired
+//    DataSource dataSource;
 
     public AuthorizationServerConfiguration() {
         super();
@@ -63,7 +70,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public TokenStore tokenStore() {
 //        return new InMemoryTokenStore();
         return new JwtTokenStore(accessTokenConverter());
+//        return new JdbcTokenStore(dataSource);
     }
+
 
     @Override
     public void configure(final ClientDetailsServiceConfigurer clients) throws Exception {
@@ -80,6 +89,5 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public void configure(AuthorizationServerSecurityConfigurer authorizationServerSecurityConfigurer) throws Exception {
         authorizationServerSecurityConfigurer.allowFormAuthenticationForClients();
     }
-
-
+    
 }

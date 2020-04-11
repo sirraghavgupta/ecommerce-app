@@ -1,10 +1,17 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 public class ForgotPasswordToken{
 
@@ -22,8 +29,6 @@ public class ForgotPasswordToken{
 
     private Date expiryDate;
 
-    public ForgotPasswordToken() {
-    }
 
     public ForgotPasswordToken(String token, User user) {
         this.token = token;
@@ -32,37 +37,6 @@ public class ForgotPasswordToken{
 
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
-    }
 
     public static Integer getEXPIRATION() {
         return EXPIRATION;

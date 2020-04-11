@@ -40,7 +40,10 @@ dependencies {
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
 
 // for lombok
-	providedCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+//	providedCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+	compileOnly 'org.projectlombok:lombok:1.18.8'
+	annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

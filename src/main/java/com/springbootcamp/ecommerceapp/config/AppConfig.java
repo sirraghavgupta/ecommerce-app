@@ -1,4 +1,4 @@
-package com.springbootcamp.ecommerceapp;
+package com.springbootcamp.ecommerceapp.config;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

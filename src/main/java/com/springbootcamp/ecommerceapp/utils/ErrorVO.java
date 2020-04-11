@@ -1,25 +1,21 @@
 package com.springbootcamp.ecommerceapp.utils;
 
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class ErrorVO extends VO{
 
     private String error;
 
-    public ErrorVO() {
-    }
-
     public ErrorVO(String error, String message, Date timestamp) {
         super(message, timestamp);
-        this.error = error;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
         this.error = error;
     }
 

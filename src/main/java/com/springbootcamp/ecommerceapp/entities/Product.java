@@ -1,6 +1,10 @@
 package com.springbootcamp.ecommerceapp.entities;
 
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Entity;
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -8,6 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 public class Product {
 
@@ -38,8 +45,6 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductReview> reviews;
 
-    public Product(){
-    }
 
     public Product(String name, String description, String brand) {
         this.name = name;
@@ -47,101 +52,6 @@ public class Product {
         this.brand = brand;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public boolean isReturnable() {
-        return isReturnable;
-    }
-
-    public void setReturnable(boolean returnable) {
-        isReturnable = returnable;
-    }
-
-    public boolean isCancelleable() {
-        return isCancelleable;
-    }
-
-    public void setCancelleable(boolean cancelleable) {
-        isCancelleable = cancelleable;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    public Set<ProductVariation> getVariations() {
-        return variations;
-    }
-
-    public void setVariations(Set<ProductVariation> variations) {
-        this.variations = variations;
-    }
-
-    public Seller getSeller() {
-        return seller;
-    }
-
-    public void setSeller(Seller seller) {
-        this.seller = seller;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public List<ProductReview> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(List<ProductReview> reviews) {
-        this.reviews = reviews;
-    }
 
     public void addVariation(ProductVariation variation){
         if(variation != null){

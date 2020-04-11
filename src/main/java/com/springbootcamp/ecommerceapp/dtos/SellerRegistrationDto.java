@@ -1,14 +1,18 @@
 package com.springbootcamp.ecommerceapp.dtos;
 
 import com.springbootcamp.ecommerceapp.validators.ValidGST;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
-public class SellerRegistrationDto extends UserRegistrationDto {
 
+@Getter
+@Setter
+public class SellerRegistrationDto extends UserRegistrationDto {
 
     @NotNull
     @NotEmpty
@@ -24,31 +28,5 @@ public class SellerRegistrationDto extends UserRegistrationDto {
     @NotEmpty
     @Size(min = 10, max = 10)
     private String companyContact;
-
-
-
-    public String getGST() {
-        return GST;
-    }
-
-    public void setGST(String GST) {
-        this.GST = GST;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getCompanyContact() {
-        return companyContact;
-    }
-
-    public void setCompanyContact(String companyContact) {
-        this.companyContact = companyContact;
-    }
 
 }

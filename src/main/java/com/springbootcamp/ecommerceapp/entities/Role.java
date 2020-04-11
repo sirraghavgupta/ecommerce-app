@@ -1,5 +1,8 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -8,6 +11,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 public class Role implements GrantedAuthority {
 
@@ -23,46 +29,11 @@ public class Role implements GrantedAuthority {
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
-    public boolean isDeleted() {
-        return isDeleted;
-    }
 
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    Role(){
-
-    }
 
     public Role(Integer id, String authority) {
         this.id = id;
         this.authority = authority;
-    }
-
-    public void setAuthority(String authority) {
-        this.authority = authority;
-    }
-
-    @Override
-    public String getAuthority() {
-        return authority;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public void addUser(User user){

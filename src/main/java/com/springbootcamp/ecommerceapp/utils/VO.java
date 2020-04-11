@@ -1,32 +1,20 @@
 package com.springbootcamp.ecommerceapp.utils;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class VO{
     private String message;
     private Date timestamp;
 
-    public VO() {
-    }
-
     public VO(String message, Date timestamp) {
         this.message = message;
-        this.timestamp = timestamp;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 

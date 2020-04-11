@@ -1,9 +1,17 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class User {
@@ -37,9 +45,6 @@ public class User {
     private Set<Address> addresses;
 
 
-    public User() {
-    }
-
     public User(String email, String firstName, String middleName, String lastName) {
         this.email = email;
         this.firstName = firstName;
@@ -47,121 +52,6 @@ public class User {
         this.lastName = lastName;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public boolean getDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public boolean isExpired() {
-        return isExpired;
-    }
-
-    public boolean getExpired() {
-        return isExpired;
-    }
-
-    public void setExpired(boolean expired) {
-        isExpired = expired;
-    }
-
-    public boolean isLocked() {
-        return isLocked;
-    }
-
-    public boolean getLocked() {
-        return isLocked;
-    }
-
-    public void setLocked(boolean locked) {
-        isLocked = locked;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public Set<Address> getAddresses() {
-        return addresses;
-    }
-
-    public void setAddresses(Set<Address> addresses) {
-        this.addresses = addresses;
-    }
-
-    public Integer getFailedAttempts() {
-        return failedAttempts;
-    }
-
-    public void setFailedAttempts(Integer failedAttempts) {
-        this.failedAttempts = failedAttempts;
-    }
 
     @Override
     public String toString() {
@@ -198,5 +88,5 @@ public class User {
             roles.add(role);
         }
     }
-
 }
+

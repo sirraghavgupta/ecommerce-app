@@ -1,11 +1,16 @@
 package com.springbootcamp.ecommerceapp.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
 import java.util.*;
 
+@Getter
+@Setter
 @Entity
 public class Customer extends User{
 
@@ -28,21 +33,6 @@ public class Customer extends User{
         this.contact = contact;
     }
 
-    public String getContact() {
-        return contact;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-
-    public List<ProductReview> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(List<ProductReview> reviews) {
-        this.reviews = reviews;
-    }
 
 //    public Set<Order> getOrders() {
 //        return orders;

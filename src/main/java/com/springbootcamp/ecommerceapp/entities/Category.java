@@ -1,9 +1,15 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 public class Category {
 
@@ -28,6 +34,8 @@ public class Category {
     @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)
     private Set<Category> subCategories;
 
+
+
     public Category() {
         parentCategory = null;
     }
@@ -35,54 +43,6 @@ public class Category {
     public Category(String name) {
         this.name = name;
         parentCategory = null;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(Set<Product> products) {
-        this.products = products;
-    }
-
-    public Set<Category> getSubCategories() {
-        return subCategories;
-    }
-
-    public void setSubCategories(Set<Category> subCategories) {
-        this.subCategories = subCategories;
-    }
-
-    public Category getParentCategory() {
-        return parentCategory;
-    }
-
-    public void setParentCategory(Category parentCategory) {
-        this.parentCategory = parentCategory;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
     }
 
     public void addSubCategory(Category category){

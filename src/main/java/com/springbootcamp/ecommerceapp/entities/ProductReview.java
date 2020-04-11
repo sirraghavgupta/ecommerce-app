@@ -1,7 +1,14 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 public class ProductReview {
 
@@ -23,60 +30,9 @@ public class ProductReview {
     private Product product;
 
 
-    public ProductReview() {
-    }
-
     public ProductReview(String review, Double rating) {
         this.review = review;
         this.rating = rating;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getReview() {
-        return review;
-    }
-
-    public void setReview(String review) {
-        this.review = review;
-    }
-
-    public Double getRating() {
-        return rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
-    }
-
-    public Customer getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Customer author) {
-        this.author = author;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
     }
 
     @Override

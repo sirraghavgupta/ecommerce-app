@@ -1,11 +1,16 @@
 package com.springbootcamp.ecommerceapp.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 public class Seller extends User{
 
@@ -27,38 +32,6 @@ public class Seller extends User{
         this.companyName = companyName;
         this.companyContact = companyContact;
         this.addRole(new Role(2, "ROLE_SELLER"));
-    }
-
-    public String getGST() {
-        return GST;
-    }
-
-    public void setGST(String GST) {
-        this.GST = GST;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getCompanyContact() {
-        return companyContact;
-    }
-
-    public void setCompanyContact(String companyContact) {
-        this.companyContact = companyContact;
-    }
-
-    public Set<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(Set<Product> products) {
-        this.products = products;
     }
 
     @Override
