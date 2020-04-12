@@ -22,18 +22,18 @@ public class Category {
 
     private boolean isDeleted = false;
 
-
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private Set<Product> products;
-
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Category parentCategory;
 
-    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Category> subCategories;
 
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<CategoryMetadataFieldValues> fieldValues;
 
 
     public Category() {
@@ -63,6 +63,16 @@ public class Category {
             products.add(product);
 
             product.setCategory(this);
+        }
+    }
+
+    public void addFieldValues(CategoryMetadataFieldValues fieldValue){
+        if(fieldValue != null){
+            if(fieldValues==null)
+                fieldValues = new HashSet<>();
+
+            fieldValues.add(fieldValue);
+            fieldValue.setCategory(this);
         }
     }
 

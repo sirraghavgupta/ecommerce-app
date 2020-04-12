@@ -35,8 +35,8 @@ public class ProductVariation {
     private Product product;
 
 
-//    @OneToMany(mappedBy = "productVariation", fetch = FetchType.EAGER)
-//    private Set<OrderProduct> orderedProducts;
+    @OneToMany(mappedBy = "productVariation", fetch = FetchType.EAGER)
+    private Set<OrderProduct> orderedProducts;
 
 
     public ProductVariation(Integer quantityAvailable, Double price) {
@@ -57,12 +57,11 @@ public class ProductVariation {
     }
 
 
-//    public void addOrderProduct(OrderProduct orderProduct){
-//        if(orderProduct != null){
-//            if(orderedProducts == null)
-//                orderedProducts = new LinkedHashSet<>();
-//            orderedProducts.add(orderProduct);
-//            orderProduct.setProductVariation(this);
-//        }
-//    }
+    public void addOrderProduct(OrderProduct orderProduct){
+        if(orderProduct != null){
+            if(orderedProducts == null)
+                orderedProducts = new LinkedHashSet<>();
+            orderedProducts.add(orderProduct);
+        }
+    }
 }

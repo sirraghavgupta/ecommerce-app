@@ -19,9 +19,11 @@ public class Customer extends User{
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductReview> reviews;
 
-//    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
-//    private Set<Order> orders;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<Orders> orders;
 
+    @OneToOne(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Cart cart;
 
     public Customer(){
         this.addRole(new Role(3, "ROLE_CUSTOMER"));
@@ -33,22 +35,12 @@ public class Customer extends User{
         this.contact = contact;
     }
 
-
-//    public Set<Order> getOrders() {
-//        return orders;
-//    }
-//
-//    public void setOrders(Set<Order> orders) {
-//        this.orders = orders;
-//    }
-
     public void addReview(ProductReview review){
         if(review != null){
             if(reviews == null)
                  reviews = new ArrayList<>();
 
             reviews.add(review);
-
             review.setAuthor(this);
         }
     }
@@ -61,14 +53,13 @@ public class Customer extends User{
                 '}';
     }
 
-//    public void addOrder(Order order){
-//        if(order!=null){
-//            if(orders==null){
-//                orders = new LinkedHashSet<>();
-//            }
-//            orders.add(order);
-//            order.setCustomer(this);
-//        }
-//    }
-
+    public void addOrder(Orders order){
+        if(order!=null){
+            if(orders==null){
+                orders = new LinkedHashSet<>();
+            }
+            orders.add(order);
+            order.setCustomer(this);
+        }
+    }
 }

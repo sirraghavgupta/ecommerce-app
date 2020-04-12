@@ -4,6 +4,7 @@ package com.springbootcamp.ecommerceapp.bootloader;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.*;
 import com.springbootcamp.ecommerceapp.security.UserDao;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +21,9 @@ public class Bootstrap implements ApplicationRunner {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    CustomerRepository customerRepository;
 
     @Autowired
     RoleRepository roleRepository;
@@ -36,7 +41,13 @@ public class Bootstrap implements ApplicationRunner {
     ProductReviewRepository productReviewRepository;
 
     @Autowired
-    UserDao userDao;
+    CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
+
+    @Autowired
+    OrdersRepository ordersRepository;
+
+    @Autowired
+    CartRepository cartRepository;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -81,7 +92,6 @@ public class Bootstrap implements ApplicationRunner {
             seller1.addAddress(new Address("B-890", "rewari", "haryana", "778884", "india", "home"));
 
 
-
             userRepository.save(admin1);
             userRepository.save(customer1);
             userRepository.save(seller1);
@@ -121,29 +131,89 @@ public class Bootstrap implements ApplicationRunner {
             lSize.setProductAttributes(attributes2);
 
 
-
-
             product1.setCategory(men);
             product1.addVariation(mSize);
             product1.addVariation(lSize);
 
             seller1.addProduct(product1);
 
-            ProductReview review1 = new ProductReview("awesome", 4.3d);
-            review1.setAuthor(customer1);
-            ProductReview review2 = new ProductReview("confortable", 4.8d);
-            review2.setAuthor(customer1);
-
-            product1.addReview(review1);
-            product1.addReview(review2);
-
             productRepository.save(product1);
 
-            ProductVariation var = productVariationRepository.findById(17L).get();
-            Map<String, Object> attributes = var.getProductAttributes();
-            System.out.println(attributes.keySet());
+
+//  =============================================================================
+            ProductReview review1 = new ProductReview("awesome", 4.3d);
+            ProductReview review2 = new ProductReview("comfortable", 4.8d);
+
+            Customer cust1 = customerRepository.findByEmail("customer@customer.com");
+            Product prod1 = productRepository.findById(13L).get();
+            cust1.addReview(review1);
+            prod1.addReview(review1);
+            System.out.println(review1.getProductReviewId());
+
+            productReviewRepository.save(review1);
 
 
+//            ProductVariation var = productVariationRepository.findById(17L).get();
+//            Map<String, Object> attributes = var.getProductAttributes();
+//            System.out.println(attributes.keySet());
+
+
+//  ============================================================================
+
+        String sizeValues = "XS,S,M,L,XL,XXL";
+        CategoryMetadataFieldValues fieldValues = new CategoryMetadataFieldValues(sizeValues);
+
+        CategoryMetadataField sizeField = new CategoryMetadataField("size");
+            System.out.println(sizeField.getName() + "############################");
+
+        Category kids = new Category("kids");
+
+        Category clothing1 = categoryRepository.findByName("clothing");
+        clothing1.addSubCategory(kids);
+        categoryRepository.save(clothing1);
+
+        kids = categoryRepository.findByName("kids");
+        kids.addFieldValues(fieldValues);
+        sizeField.addFieldValues(fieldValues);
+
+        categoryMetadataFieldValuesRepository.save(fieldValues);
+
+//    =======================================================================
+//    ================= FOR ORDER DOMAIN NOW ================================
+
+
+            Orders order1 = new Orders();
+            order1.setDateCreated(new Date());
+            order1.setPaymentMethod("Cash on Delivery");
+            order1.setId(2009992L);
+            Customer grahak = customerRepository.findByEmail("customer@customer.com");
+            order1.setCustomer(grahak);
+            order1.setDeliveryAddress(new OrderAddress(new Address("B-70", "palwal", "haryana", "778884", "india", "home")));
+
+            ProductVariation buy1 = productVariationRepository.findById(14L).get();
+            ProductVariation buy2 = productVariationRepository.findById(15L).get();
+
+            OrderProduct orderProduct1 = new OrderProduct();
+            orderProduct1.setProductVariation(buy1);
+
+            OrderProduct orderProduct2 = new OrderProduct();
+            orderProduct2.setProductVariation(buy2);
+
+            order1.addOrderProduct(orderProduct1);
+            order1.addOrderProduct(orderProduct2);
+            order1.calculateBillAmount();
+
+            Cart cart1 = new Cart();
+            cart1.setOwner(customer1);
+            cart1.setItem(buy1);
+            cart1.setQuantity(1);
+            cart1.setWishlisted(true);
+
+
+            ordersRepository.save(order1);
+            cartRepository.save(cart1);
+
+//  ===============================================================================
         }
     }
 }

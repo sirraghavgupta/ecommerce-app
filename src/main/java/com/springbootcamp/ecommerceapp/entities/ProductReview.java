@@ -1,5 +1,6 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import com.springbootcamp.ecommerceapp.utils.ProductReviewId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,40 +9,49 @@ import javax.persistence.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 public class ProductReview {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @EmbeddedId
+    private ProductReviewId productReviewId;
 
     private String review;
     private Double rating;
-
     private boolean isDeleted = false;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_user_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @MapsId("customerUserId")
     private Customer author;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @MapsId("productId")
     private Product product;
 
+    public ProductReview() {
+        productReviewId = new ProductReviewId();
+    }
 
     public ProductReview(String review, Double rating) {
         this.review = review;
         this.rating = rating;
+        productReviewId = new ProductReviewId();
     }
 
     @Override
     public String toString() {
         return "ProductReview{" +
-                "id=" + id +
+                "productReviewId=" + productReviewId +
                 ", review='" + review + '\'' +
                 ", rating=" + rating +
-                "posted by=" + author.getEmail() +
                 '}';
+    }
+
+    public void bindCustomer(Customer customer){
+        this.setAuthor(customer);
+        customer.addReview(this);
+    }
+    public void bindProduct(Product product){
+        this.setProduct(product);
+        product.addReview(this);
     }
 }
