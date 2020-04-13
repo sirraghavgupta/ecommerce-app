@@ -1,7 +1,8 @@
 package com.springbootcamp.ecommerceapp.services;
 
+import com.springbootcamp.ecommerceapp.dtos.AddressDto;
 import com.springbootcamp.ecommerceapp.dtos.CustomerRegistrationDto;
-import com.springbootcamp.ecommerceapp.dtos.ForgotPassword;
+import com.springbootcamp.ecommerceapp.dtos.ForgotPasswordDto;
 import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.exception.EmailAlreadyExistsException;
@@ -11,11 +12,9 @@ import com.springbootcamp.ecommerceapp.utils.ResponseVO;
 import com.springbootcamp.ecommerceapp.utils.VO;
 import com.springbootcamp.ecommerceapp.validators.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -25,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -64,6 +61,9 @@ public class UserService {
 
     @Autowired
     EmailValidator emailValidator;
+
+    @Autowired
+    AddressRepository addressRepository;
 
     @Autowired
     private TokenStore tokenStore;
@@ -281,7 +281,7 @@ public class UserService {
 
     public void sendPasswordResetConfirmationMail(String email) {
         String subject = "Password Reset Successfully";
-        String message = "the password for yout account has been reset successfully";
+        String message = "the password for your account has been reset successfully";
         emailService.sendEmail(email, subject, message);
     }
 
@@ -423,7 +423,7 @@ public class UserService {
         return new ResponseEntity<VO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> resetPassword(String token, ForgotPassword passwords, WebRequest request){
+    public ResponseEntity<VO> resetPassword(String token, ForgotPasswordDto passwords, WebRequest request){
         Locale locale = request.getLocale();
         String message, error;
         VO response;
@@ -460,5 +460,52 @@ public class UserService {
         message = "Password changed successfully.";
         response = new ResponseVO<>(null, message, new Date());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> changePassword(String email, ForgotPasswordDto passwords){
+        User user = userRepository.findByEmail(email);
+        user.setPassword(passwordEncoder.encode(passwords.getPassword()));
+        userRepository.save(user);
+        sendPasswordResetConfirmationMail(email);
+        VO response = new ResponseVO<String>(null, "Password changed successfully", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> updateAddressById(String email, Long addressId, AddressDto addressDto) {
+        Optional<Address> address = addressRepository.findById(addressId);
+        User user = userRepository.findByEmail(email);
+        VO response;
+
+        if(!address.isPresent()){
+            response = new ErrorVO("Not found", "No address found with this id", new Date());
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        Address savedAddress = address.get();
+        if(!savedAddress.getUser().getEmail().equals(email)){
+            response = new ErrorVO("Invalid Operation", "This address doesn't belong to this user.", new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+        }
+
+        // update the address
+        if(addressDto.getAddressLine() != null)
+            savedAddress.setAddressLine(addressDto.getAddressLine());
+
+        if(addressDto.getCity() != null)
+            savedAddress.setCity(addressDto.getCity());
+
+        if(addressDto.getState() != null)
+            savedAddress.setState(addressDto.getState());
+
+        if(addressDto.getCountry() != null)
+            savedAddress.setCountry(addressDto.getCountry());
+
+        if(addressDto.getZipCode() != null)
+            savedAddress.setZipCode(addressDto.getZipCode());
+
+        if(addressDto.getLabel() != null)
+            savedAddress.setLabel(addressDto.getLabel());
+
+        response = new ResponseVO<String>("null", "Address has been updated successfully.", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
     }
 }

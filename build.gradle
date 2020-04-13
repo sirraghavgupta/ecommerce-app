@@ -30,6 +30,10 @@ dependencies {
 	compile 'io.springfox:springfox-swagger-ui:2.4.0'
 	compile 'io.springfox:springfox-swagger2:2.4.0'
 
+//	for patch request purpose.
+	compile group: 'com.github.java-json-tools', name: 'json-patch', version: '1.12'
+
+
 //	for dto to entity mapping
 	compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.6'
 

@@ -1,21 +1,25 @@
 package com.springbootcamp.ecommerceapp.services;
 
-import com.springbootcamp.ecommerceapp.dtos.SellerAdminApiDto;
-import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
+import com.springbootcamp.ecommerceapp.dtos.*;
+import com.springbootcamp.ecommerceapp.entities.Address;
+import com.springbootcamp.ecommerceapp.entities.Customer;
 import com.springbootcamp.ecommerceapp.entities.Seller;
 import com.springbootcamp.ecommerceapp.repos.SellerRepository;
+import com.springbootcamp.ecommerceapp.utils.ResponseVO;
+import com.springbootcamp.ecommerceapp.utils.VO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SellerService {
@@ -25,6 +29,9 @@ public class SellerService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    AddressService addressService;
 
     @Autowired
     private EmailService emailService;
@@ -38,6 +45,23 @@ public class SellerService {
         SellerAdminApiDto sellerAdminApiDto = modelMapper.map(seller, SellerAdminApiDto.class);
         sellerAdminApiDto.setFullName(seller.getFirstName(), seller.getMiddleName(), seller.getLastName());
         return sellerAdminApiDto;
+    }
+
+    public Seller toSeller(SellerViewProfileDto sellerDto){
+        Seller seller =  modelMapper.map(sellerDto, Seller.class);
+        AddressDto addressDto = sellerDto.getAddressDto();
+        if(addressDto != null){
+            Address address = addressService.toAddress(addressDto);
+            seller.addAddress(address);
+        }
+        return seller;
+    }
+
+    public SellerViewProfileDto toSellerViewProfileDto(Seller seller){
+        SellerViewProfileDto sellerViewProfileDto = modelMapper.map(seller, SellerViewProfileDto.class);
+        AddressDto addressDto = addressService.toAddressDto(seller.getAddresses().stream().findFirst().get());
+        sellerViewProfileDto.setAddressDto(addressDto);
+        return sellerViewProfileDto;
     }
 
     public boolean isEmailUnique(String email){
@@ -102,5 +126,43 @@ public class SellerService {
             return null;
         SellerAdminApiDto sellerAdminApiDto = toSellerAdminApiDto(seller);
         return sellerAdminApiDto;
+    }
+
+    public ResponseEntity<VO> getUserProfile(String email) {
+        Seller seller = sellerRepository.findByEmail(email);
+        VO response;
+        SellerViewProfileDto sellerViewProfileDto = toSellerViewProfileDto(seller);
+        response = new ResponseVO<SellerViewProfileDto>(sellerViewProfileDto, null, new Date());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> updateUserProfile(String email, SellerViewProfileDto profileDto) {
+        Seller savedSeller = sellerRepository.findByEmail(email);
+
+        if(profileDto.getFirstName() != null)
+            savedSeller.setFirstName(profileDto.getFirstName());
+
+        if(profileDto.getLastName() != null)
+            savedSeller.setLastName(profileDto.getLastName());
+
+        if(profileDto.getImage() != null)
+            savedSeller.setImage(profileDto.getImage());
+
+        if(profileDto.getIsActive() != null && !profileDto.getIsActive())
+            savedSeller.setActive(profileDto.getIsActive());
+
+        if(profileDto.getGST() != null)
+            savedSeller.setGST(profileDto.getGST());
+
+        if(profileDto.getCompanyContact() != null)
+            savedSeller.setCompanyContact(profileDto.getCompanyContact());
+
+        if(profileDto.getCompanyName() != null)
+            savedSeller.setCompanyName(profileDto.getCompanyName());
+
+        sellerRepository.save(savedSeller);
+
+        VO response = new ResponseVO<String>("null", "Your profile has been updated", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
     }
 }

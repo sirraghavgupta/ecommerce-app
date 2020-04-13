@@ -26,7 +26,7 @@ public class Address {
     private boolean isDeleted = false;
 
     @ManyToOne
-    @JoinColumn(name = "customer_user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
 
@@ -52,14 +52,4 @@ public class Address {
                 '}';
     }
 
-// ========= for  many to many purpose
-//    public void addUser(User user){
-//        if(user!=null){
-//            if(users==null)
-//                users = new HashSet<User>();
-//
-//            System.out.println("user added");
-//            users.add(user);
-//        }
-//    }
 }

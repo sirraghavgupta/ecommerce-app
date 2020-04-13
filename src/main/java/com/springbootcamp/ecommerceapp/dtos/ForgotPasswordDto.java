@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @PasswordMatches
-public class ForgotPassword {
+public class ForgotPasswordDto {
 
     @NotNull
     @NotEmpty
@@ -24,7 +24,7 @@ public class ForgotPassword {
     @NotEmpty
     String confirmPassword;
 
-    public ForgotPassword(@NotNull @NotEmpty String password, @NotNull @NotEmpty String confirmPassword) {
+    public ForgotPasswordDto(@NotNull @NotEmpty String password, @NotNull @NotEmpty String confirmPassword) {
         this.password = password;
         this.confirmPassword = confirmPassword;
     }

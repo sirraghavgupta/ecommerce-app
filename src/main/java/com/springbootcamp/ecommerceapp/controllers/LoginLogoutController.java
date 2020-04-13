@@ -1,9 +1,6 @@
 package com.springbootcamp.ecommerceapp.controllers;
 
-import com.springbootcamp.ecommerceapp.dtos.ForgotPassword;
-import com.springbootcamp.ecommerceapp.entities.ForgotPasswordToken;
-import com.springbootcamp.ecommerceapp.entities.User;
-import com.springbootcamp.ecommerceapp.entities.VerificationToken;
+import com.springbootcamp.ecommerceapp.dtos.ForgotPasswordDto;
 import com.springbootcamp.ecommerceapp.services.UserService;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
 import com.springbootcamp.ecommerceapp.utils.VO;
@@ -18,9 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 @RestController
 public class LoginLogoutController {
@@ -59,8 +54,8 @@ public class LoginLogoutController {
     }
 
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<VO> resetPassword(@RequestParam("token") String token, @Valid @RequestBody ForgotPassword passwords, WebRequest request){
+    @PutMapping("/reset-password")
+    public ResponseEntity<VO> resetPassword(@RequestParam("token") String token, @Valid @RequestBody ForgotPasswordDto passwords, WebRequest request){
         return userService.resetPassword(token, passwords, request);
     }
 }

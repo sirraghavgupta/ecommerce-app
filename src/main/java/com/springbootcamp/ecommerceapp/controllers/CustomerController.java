@@ -1,18 +1,23 @@
 package com.springbootcamp.ecommerceapp.controllers;
 
-import com.springbootcamp.ecommerceapp.dtos.UserRegistrationDto;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.springbootcamp.ecommerceapp.dtos.AddressDto;
+import com.springbootcamp.ecommerceapp.dtos.CustomerViewProfileDto;
 import com.springbootcamp.ecommerceapp.entities.Product;
 import com.springbootcamp.ecommerceapp.entities.User;
 import com.springbootcamp.ecommerceapp.repos.ProductRepository;
+import com.springbootcamp.ecommerceapp.services.CustomerService;
 import com.springbootcamp.ecommerceapp.services.UserService;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
+import com.springbootcamp.ecommerceapp.utils.VO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 
@@ -20,13 +25,13 @@ import java.util.List;
 public class CustomerController {
 
     @Autowired
-    private TokenStore tokenStore;
-
-    @Autowired
     ProductRepository productRepository;
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    CustomerService customerService;
 
     @GetMapping("/customer/home")
     public ResponseEntity<ResponseVO> getCustomerHome(){
@@ -36,10 +41,45 @@ public class CustomerController {
         return new ResponseEntity<ResponseVO>(response, HttpStatus.OK);
     }
 
-    // just for testing
-    @GetMapping("/user-test")
-    public void getUser(){
-        User user = userService.getUserByEmail("draghavgupta.96@gmail.com");
-        System.out.println("######### " + user);
+    @GetMapping("/customer/profile")
+    public ResponseEntity<VO> getProfileDetails(HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return customerService.getUserProfile(username);
+    }
+
+    @PatchMapping("/customer/profile")
+    public ResponseEntity<VO> updateProfileDetails(@Valid @RequestBody CustomerViewProfileDto profileDto, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return customerService.updateUserProfile(username, profileDto);
+    }
+
+    @GetMapping("/customer/addresses")
+    public ResponseEntity<VO> getCustomerAddresses(HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return customerService.getCustomerAddresses(username);
+    }
+
+    @PostMapping("/customer/addresses")
+    public ResponseEntity<VO> addNewAddress(@Valid @RequestBody AddressDto addressDto, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return customerService.addNewAddress(username, addressDto);
+    }
+
+    @DeleteMapping("/customer/addresses/{id}")
+    public ResponseEntity<VO> deleteAddressById(@PathVariable Long id, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return customerService.deleteAddress(username, id);
+    }
+
+    @PatchMapping("/customer/addresses/{id}")
+    public ResponseEntity<VO> updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long id, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return userService.updateAddressById(username, id, addressDto);
     }
 }

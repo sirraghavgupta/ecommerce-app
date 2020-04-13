@@ -54,4 +54,14 @@ public class Seller extends User{
             product.setSeller(this);
         }
     }
+
+    @Override
+    public void addAddress(Address address) {
+        if(address !=null){
+            Set<Address> addresses = new HashSet<Address>();
+            addresses.add(address);
+            this.setAddresses(addresses);
+            address.setUser(this);
+        }
+    }
 }

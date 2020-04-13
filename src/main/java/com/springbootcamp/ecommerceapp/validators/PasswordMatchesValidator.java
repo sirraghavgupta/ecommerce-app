@@ -1,10 +1,8 @@
 package com.springbootcamp.ecommerceapp.validators;
 
 import com.springbootcamp.ecommerceapp.dtos.CustomerRegistrationDto;
-import com.springbootcamp.ecommerceapp.dtos.ForgotPassword;
+import com.springbootcamp.ecommerceapp.dtos.ForgotPasswordDto;
 import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
-import com.springbootcamp.ecommerceapp.dtos.UserRegistrationDto;
-import com.springbootcamp.ecommerceapp.entities.Customer;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -23,8 +21,8 @@ public class PasswordMatchesValidator
             SellerRegistrationDto seller = (SellerRegistrationDto) obj;
             return seller.getPassword().equals(seller.getConfirmPassword());
         }
-        else if(obj instanceof ForgotPassword){
-            ForgotPassword passwords = (ForgotPassword) obj;
+        else if(obj instanceof ForgotPasswordDto){
+            ForgotPasswordDto passwords = (ForgotPasswordDto) obj;
             return passwords.getPassword().equals(passwords.getConfirmPassword());
         }
 

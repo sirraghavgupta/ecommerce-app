@@ -1,25 +1,56 @@
 package com.springbootcamp.ecommerceapp.controllers;
 
+import com.springbootcamp.ecommerceapp.dtos.AddressDto;
+import com.springbootcamp.ecommerceapp.dtos.SellerViewProfileDto;
+import com.springbootcamp.ecommerceapp.services.SellerService;
+import com.springbootcamp.ecommerceapp.services.UserService;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
+import com.springbootcamp.ecommerceapp.utils.VO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.security.Principal;
 import java.util.Date;
 
 @RestController
 public class SellerController {
 
     @Autowired
-    private TokenStore tokenStore;
+    SellerService sellerService;
+
+    @Autowired
+    UserService userService;
 
     @GetMapping("/seller/home")
     public ResponseEntity<ResponseVO> getsellerHome(){
         String data = "seller home";
         ResponseVO<String> response = new ResponseVO<>(data, null, new Date());
         return new ResponseEntity<ResponseVO>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/seller/profile")
+    public ResponseEntity<VO> getProfileDetails(HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return sellerService.getUserProfile(username);
+    }
+
+    @PatchMapping("/seller/profile")
+    public ResponseEntity<VO> updateProfileDetails(@RequestBody SellerViewProfileDto profileDto, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return sellerService.updateUserProfile(username, profileDto);
+    }
+
+    @PatchMapping("/seller/addresses/{id}")
+    public ResponseEntity<VO> updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long id, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String username = principal.getName();
+        return userService.updateAddressById(username, id, addressDto);
     }
 }
