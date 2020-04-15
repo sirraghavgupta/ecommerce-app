@@ -1,0 +1,420 @@
+package com.springbootcamp.ecommerceapp.services;
+
+import com.springbootcamp.ecommerceapp.dtos.CategoryAdminResponseDto;
+import com.springbootcamp.ecommerceapp.dtos.CategoryDto;
+import com.springbootcamp.ecommerceapp.dtos.CategoryMetadataFieldDto;
+import com.springbootcamp.ecommerceapp.dtos.MetadataFieldValueInsertDto;
+import com.springbootcamp.ecommerceapp.entities.Category;
+import com.springbootcamp.ecommerceapp.entities.CategoryMetadataField;
+import com.springbootcamp.ecommerceapp.entities.CategoryMetadataFieldValues;
+import com.springbootcamp.ecommerceapp.entities.Product;
+import com.springbootcamp.ecommerceapp.repos.CategoryMetadataFieldRepository;
+import com.springbootcamp.ecommerceapp.repos.CategoryMetadataFieldValuesRepository;
+import com.springbootcamp.ecommerceapp.repos.CategoryRepository;
+import com.springbootcamp.ecommerceapp.utils.*;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import javax.management.modelmbean.DescriptorSupport;
+import java.util.*;
+
+@Service
+public class CategoryService {
+
+    @Autowired
+    CategoryRepository categoryRepository;
+
+    @Autowired
+    CategoryMetadataFieldService fieldService;
+
+    @Autowired
+    CategoryMetadataFieldRepository fieldRepository;
+
+    @Autowired
+    CategoryMetadataFieldValuesRepository valuesRepository;
+
+    @Autowired
+    ModelMapper modelMapper;
+
+    CategoryDto toCategoryDto(Category category){
+        if(category == null)
+            return null;
+        CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
+        CategoryDto parentDto = toCategoryDto(category.getParentCategory());
+        categoryDto.setParent(parentDto);
+        return categoryDto;
+    }
+
+    CategoryDto toCategoryDtoNonRecursive(Category category){
+        if(category == null)
+            return null;
+        CategoryDto categoryDto = modelMapper.map(category, CategoryDto.class);
+        categoryDto.setParent(null);
+        return categoryDto;
+    }
+
+    private String validateNewCategory(String categoryName, Long parentId) {
+        if(parentId == null){
+            Category preStored = categoryRepository.findByName(categoryName);
+            if(preStored == null)
+                return "valid";
+            return "Category already exists. So, can not insert at the root level.";
+        }
+
+        // check uniqueness at the root level
+        List<Category> preStored = categoryRepository.findByParentIdIsNull();
+        for(Category c : preStored){
+            if(c.getName().equalsIgnoreCase(categoryName))
+                return "Category already exists at the root level.";
+        }
+
+        Category parent = categoryRepository.findById(parentId).get();
+
+        // check immediate children
+        Set<Category> children = parent.getSubCategories();
+        for(Category c : children){
+            if(c.getName().equalsIgnoreCase(categoryName))
+                return "Sibling category exists with same name.";
+        }
+
+        // check product associations of parent
+        Set<Product> products = parent.getProducts();
+        if(!products.isEmpty())
+            return "Parent category has product associations.";
+
+        // check path from parent to root
+        while(parent!=null){
+            if(parent.getName().equalsIgnoreCase(categoryName))
+                return "Category already exists as ancestor.";
+            parent = parent.getParentCategory();
+        }
+
+        return "valid";
+    }
+
+    public ResponseEntity<VO> createNewCategory(String categoryName, Long parentId) {
+        VO response;
+        String message = validateNewCategory(categoryName, parentId);
+        if(!message.equals("valid")){
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Category category = new Category(categoryName);
+        Category parent;
+        if(parentId==null){
+            category.setParentCategory(null);
+            categoryRepository.save(category);
+        }
+        else{
+            Optional<Category> parentCategory = categoryRepository.findById(parentId);
+            if(!parentCategory.isPresent()){
+                response = new ErrorVO("Invalid input", "Parent category not found", new Date());
+                return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+            }
+            else{
+                parent = parentCategory.get();
+                category.setParentCategory(parent);
+                parent.addSubCategory(category);
+                categoryRepository.save(parent);
+            }
+        }
+        response = new ResponseVO<Category>(null, "Success", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+    }
+
+    public CategoryAdminResponseDto toCategoryAdminResponseDto(Category category){
+
+        CategoryAdminResponseDto categoryAdminResponseDto = new CategoryAdminResponseDto();
+
+        // get actual category with all parent tree
+        CategoryDto categoryDto = toCategoryDto(category);
+        categoryAdminResponseDto.setCategory(categoryDto);
+
+        // get child categories
+        Set<CategoryDto> subCategories;
+        if(category.getSubCategories() != null) {
+            subCategories = new HashSet<>();
+
+            category.getSubCategories().forEach((e) -> {
+                subCategories.add(toCategoryDtoNonRecursive(e));
+            });
+            categoryAdminResponseDto.setSubCategories(subCategories);
+        }
+
+        // get the possible metadata fields and valucategoryDtoes
+        Set<CategoryMetadataFieldDto> fieldValues;
+        if(category.getFieldValues() != null) {
+            fieldValues = new HashSet<>();
+
+            category.getFieldValues().forEach((e) -> {
+                CategoryMetadataFieldDto dto = fieldService.toCategoryMetadataFieldDto(e.getCategoryMetadataField());
+                dto.setValues(StringToMapParser.toSetOfValues(e.getValue()));
+                fieldValues.add(dto);
+            });
+            categoryAdminResponseDto.setFieldValues(fieldValues);
+        }
+        return categoryAdminResponseDto;
+    }
+
+    public ResponseEntity<VO> getCategoryAllDetails(Long categoryId) {
+        VO response;
+        Optional<Category> preStored = categoryRepository.findById(categoryId);
+        if(!preStored.isPresent()){
+            response = new ErrorVO("Not Found", "Category with given id does not exist.", new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        CategoryAdminResponseDto categoryAdminResponseDto = toCategoryAdminResponseDto(preStored.get());
+
+        response = new ResponseVO<CategoryAdminResponseDto>(categoryAdminResponseDto, null, new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> getAllCategories(String offset, String size, String sortByField, String order) {
+        VO response;
+        Integer pageNo = Integer.parseInt(offset);
+        Integer pageSize = Integer.parseInt(size);
+
+        Pageable pageable;
+        if(order.equals("ascending"))
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).ascending());
+        else
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).descending());
+
+        List<Category> categories = categoryRepository.findAll(pageable);
+        List<CategoryAdminResponseDto> categoryDtos = new ArrayList<>();
+
+        categories.forEach((category)->{
+            categoryDtos.add(toCategoryAdminResponseDto(category));
+        });
+
+        response = new ResponseVO<List>(categoryDtos, null, new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> getAllCategoriesForSeller() {
+        VO response;
+        List<Category> categories = categoryRepository.findAll();
+        List<CategoryAdminResponseDto> categoryDtos = new ArrayList<>();
+
+        categories.forEach((category)->{
+            categoryDtos.add(toCategoryAdminResponseDto(category));
+        });
+
+        response = new ResponseVO<List>(categoryDtos, null, new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> getAllCategoriesForCustomer(Long id) {
+        VO response;
+        if(id==null) {
+            List<Category> rootCategories = categoryRepository.findByParentIdIsNull();
+            List<CategoryDto> categoryDtos = new ArrayList<>();
+            rootCategories.forEach((e) -> {
+                categoryDtos.add(toCategoryDtoNonRecursive(e));
+            });
+            response = new ResponseVO<List>(categoryDtos, null, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.OK);
+        }
+        Optional<Category> savedCategory = categoryRepository.findById(id);
+        if(!savedCategory.isPresent()){
+            response = new ErrorVO("Not Found", "Category does not exist.", new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Category category = savedCategory.get();
+        Set<Category> subCategories = category.getSubCategories();
+        List<CategoryDto> subCategoryDtos = new ArrayList<>();
+
+        subCategories.forEach((e)->{
+            subCategoryDtos.add(toCategoryDtoNonRecursive(e));
+        });
+        response = new ResponseVO<List>(subCategoryDtos, null, new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> deleteCategoryById(Long id) {
+        VO response;
+        Optional<Category> savedCategory = categoryRepository.findById(id);
+        if(!savedCategory.isPresent()){
+            response = new ErrorVO("Not Found", "Category does not exist.", new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Category category = savedCategory.get();
+
+        if(!category.getProducts().isEmpty()){
+            response = new ErrorVO("Validation failed", "This category " +
+                    "is associated with some products.", new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+        }
+
+        if(!category.getSubCategories().isEmpty()){
+            response = new ErrorVO("Validation failed", "This category " +
+                    "has child categories.", new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+        }
+
+//        deleteCategory(category);
+        categoryRepository.deleteCategoryById(id);
+
+        response = new ResponseVO<String>(null, "Success", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> updateCategory(Long id, String name) {
+        VO response;
+        Optional<Category> savedCategory = categoryRepository.findById(id);
+        if(!savedCategory.isPresent()){
+            response = new ErrorVO("Not Found", "Category does not exist.", new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Category category = savedCategory.get();
+        category.setName(name);
+        categoryRepository.save(category);
+
+        response = new ResponseVO<String>(null, "Success", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<VO> addMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
+        VO response;
+        String message = validateCategoryMetadataFieldDto(fieldValueDtos, "creation");
+        if(!message.equalsIgnoreCase("success")){
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        return createMetadataFieldValuePair(fieldValueDtos);
+    }
+
+    public String validateCategoryMetadataFieldDto(MetadataFieldValueInsertDto fieldValueDtos, String purpose) {
+        VO response;
+        String message;
+
+        Optional<Category> savedCategory = categoryRepository.findById(fieldValueDtos.getCategoryId());
+        if(!savedCategory.isPresent()){
+            message = "Category does not exist.";
+            return message;
+        }
+
+        Category category = savedCategory.get();
+        for(CategoryMetadataFieldDto fieldValuePair : fieldValueDtos.getFieldValues()){
+            Optional<CategoryMetadataField> field = fieldRepository.findById(fieldValuePair.getId());
+            if(!field.isPresent()){
+                message = "Field id "+fieldValuePair.getId()+" not found";
+                return message;
+            }
+
+            if(purpose.equalsIgnoreCase("creation")){
+                if(!field.get().getFieldValues().isEmpty()){
+                    message = "Field values already exist for field "+fieldValuePair.getId();
+                }
+            }
+
+            // if field is found valid, then check for values
+            if(fieldValuePair.getValues().isEmpty()){
+                message = "No field values provided to insert for field id "+fieldValuePair.getId();
+                return message;
+            }
+            //duplicate values error can not occur as I am storing values in a set.
+        }
+
+        message = "success";
+        return message;
+    }
+
+    public ResponseEntity<VO> createMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
+        VO response;
+        Category category = categoryRepository.findById(fieldValueDtos.getCategoryId()).get();
+        CategoryMetadataFieldValues categoryFieldValues = new CategoryMetadataFieldValues();
+        CategoryMetadataField categoryField;
+
+        for(CategoryMetadataFieldDto fieldValuePair : fieldValueDtos.getFieldValues()){
+
+            categoryField = fieldRepository.findById(fieldValuePair.getId()).get();
+            String values = StringToMapParser.toCommaSeparatedString(fieldValuePair.getValues());
+
+            categoryFieldValues.setValue(values);
+            categoryFieldValues.setCategory(category);
+            categoryFieldValues.setCategoryMetadataField(categoryField);
+
+            valuesRepository.save(categoryFieldValues);
+        }
+        response = new ResponseVO<String>(null, "Success", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<VO> updateMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
+        VO response;
+        String message = validateCategoryMetadataFieldDto(fieldValueDtos, "creation");
+        if(!message.equalsIgnoreCase("success")){
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Category category = categoryRepository.findById(fieldValueDtos.getCategoryId()).get();
+        Optional<CategoryMetadataFieldValues> savedMetadataFieldValue;
+        CategoryMetadataFieldValues metadataFieldValue;
+        List<CategoryMetadataFieldDto> fieldValuePairs = fieldValueDtos.getFieldValues();
+
+        for(CategoryMetadataFieldDto fieldValuePair : fieldValuePairs){
+            CategoryMetadataField field = fieldRepository.findById(fieldValuePair.getId()).get();
+
+            CategoryMetadataFieldValuesId fieldValuePairId =
+                    new CategoryMetadataFieldValuesId(category.getId(), field.getId());
+
+            savedMetadataFieldValue = valuesRepository.findById(fieldValuePairId);
+            String values = null;
+            Set<String> valueSet;
+            if(savedMetadataFieldValue.isPresent()){
+                metadataFieldValue = savedMetadataFieldValue.get();
+                values = metadataFieldValue.getValue();
+                valueSet = StringToMapParser.toSetOfValues(values);
+            }
+            else{
+                metadataFieldValue = new CategoryMetadataFieldValues();
+                valueSet = new HashSet<>();
+            }
+
+            for(String value : fieldValuePair.getValues()){
+                valueSet.add(value);
+            }
+
+            values = StringToMapParser.toCommaSeparatedString(valueSet);
+
+            metadataFieldValue.setValue(values);
+            metadataFieldValue.setCategoryMetadataField(field);
+            metadataFieldValue.setCategory(category);
+
+            valuesRepository.save(metadataFieldValue);
+        }
+        response = new ResponseVO<String>(null, "Success", new Date());
+        return new ResponseEntity<VO>(response, HttpStatus.OK);
+    }
+
+
+
+//    private void deleteCategory(Category category) {
+//        Category parentCategory = category.getParentCategory();
+//        parentCategory.getSubCategories().remove(category);
+//        category.setParentCategory(null);
+//        categoryRepository.save(parentCategory);
+//
+//        category.getFieldValues().forEach((fieldValue)->{
+//            fieldValue.setCategory(null);
+//            fieldValue.getCategoryMetadataField().set
+//            fieldValue.setCategoryMetadataField(null);
+//
+//        });
+//    }
+
+}

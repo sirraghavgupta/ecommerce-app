@@ -44,6 +44,9 @@ public class Bootstrap implements ApplicationRunner {
     CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
 
     @Autowired
+    CategoryMetadataFieldRepository fieldRepository;
+
+    @Autowired
     OrdersRepository ordersRepository;
 
     @Autowired
@@ -76,6 +79,7 @@ public class Bootstrap implements ApplicationRunner {
             admin1.setPassword(passwordEncoder.encode("pass"));
             admin1.addRole(admin);
             admin1.addRole(seller);
+            admin1.addRole(customer);
             admin1.addAddress(new Address("B-90", "homely", "haryana", "778884", "india", "home"));
             admin1.addAddress(new Address("75/60, ballabgarh", "faridabad", "haryana", "778654", "india", "home"));
             admin1.setActive(true);
@@ -163,8 +167,15 @@ public class Bootstrap implements ApplicationRunner {
 
         String sizeValues = "XS,S,M,L,XL,XXL";
         CategoryMetadataFieldValues fieldValues = new CategoryMetadataFieldValues(sizeValues);
+//        String colorValues = "red, green, yellow";
+//        CategoryMetadataFieldValues fieldValues1 = new CategoryMetadataFieldValues(colorValues);
+//        String ramValues = "6gb, 8gb, 16gb";
+//        CategoryMetadataFieldValues fieldValues2 = new CategoryMetadataFieldValues(ramValues);
 
         CategoryMetadataField sizeField = new CategoryMetadataField("size");
+//        CategoryMetadataField colorField = new CategoryMetadataField("color");
+//        CategoryMetadataField ramField = new CategoryMetadataField("ram");
+
             System.out.println(sizeField.getName() + "############################");
 
         Category kids = new Category("kids");
@@ -174,10 +185,23 @@ public class Bootstrap implements ApplicationRunner {
         categoryRepository.save(clothing1);
 
         kids = categoryRepository.findByName("kids");
-        kids.addFieldValues(fieldValues);
-        sizeField.addFieldValues(fieldValues);
+//        kids.addFieldValues(fieldValues);
+//        kids.addFieldValues(fieldValues1);
+//        kids.addFieldValues(fieldValues2);
+//        sizeField.addFieldValues(fieldValues);
+        fieldRepository.save(sizeField);
 
+//        colorField.addFieldValues(fieldValues1);
+//        ramField.addFieldValues(fieldValues2);
+
+        fieldValues.setCategoryMetadataField(sizeField);
+        fieldValues.setCategory(kids);
         categoryMetadataFieldValuesRepository.save(fieldValues);
+
+//
+//        categoryMetadataFieldValuesRepository.save(fieldValues1);
+//        categoryMetadataFieldValuesRepository.save(fieldValues2);
+
 
 //    =======================================================================
 //    ================= FOR ORDER DOMAIN NOW ================================
@@ -215,6 +239,8 @@ public class Bootstrap implements ApplicationRunner {
             cartRepository.save(cart1);
 
 //  ===============================================================================
+
+
         }
     }
 }

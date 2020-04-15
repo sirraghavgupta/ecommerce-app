@@ -18,11 +18,11 @@ public class CategoryMetadataFieldValues {
     @EmbeddedId
     private CategoryMetadataFieldValuesId id = new CategoryMetadataFieldValuesId();
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("categoryId")
     private Category category;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("categoryMetadataFieldId")
     private CategoryMetadataField categoryMetadataField;
 
