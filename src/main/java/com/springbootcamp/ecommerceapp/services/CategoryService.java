@@ -33,6 +33,9 @@ public class CategoryService {
     CategoryMetadataFieldService fieldService;
 
     @Autowired
+    PagingService pagingService;
+
+    @Autowired
     CategoryMetadataFieldRepository fieldRepository;
 
     @Autowired
@@ -178,14 +181,8 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> getAllCategories(String offset, String size, String sortByField, String order) {
         BaseVO response;
-        Integer pageNo = Integer.parseInt(offset);
-        Integer pageSize = Integer.parseInt(size);
 
-        Pageable pageable;
-        if(order.equals("ascending"))
-            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).ascending());
-        else
-            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).descending());
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
         List<Category> categories = categoryRepository.findAll(pageable);
         List<CategoryAdminResponseDto> categoryDtos = new ArrayList<>();

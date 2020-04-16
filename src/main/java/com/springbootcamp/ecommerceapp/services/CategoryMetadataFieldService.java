@@ -35,6 +35,9 @@ public class CategoryMetadataFieldService {
     CategoryRepository categoryRepository;
 
     @Autowired
+    PagingService pagingService;
+
+    @Autowired
     ModelMapper modelMapper;
 
     public CategoryMetadataField toCategoryMetadataField(CategoryMetadataFieldDto fieldDto){
@@ -66,14 +69,8 @@ public class CategoryMetadataFieldService {
 
     public ResponseEntity<BaseVO> getAllMetadataFields(String offset, String size, String sortByField, String order) {
         BaseVO response;
-        Integer pageNo = Integer.parseInt(offset);
-        Integer pageSize = Integer.parseInt(size);
 
-        Pageable pageable;
-        if(order.equals("ascending"))
-             pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).ascending());
-        else
-             pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).descending());
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
         List<CategoryMetadataField> fields = fieldRepository.findAll(pageable);
         List<CategoryMetadataFieldDto> responseData = new ArrayList<>();
@@ -91,15 +88,8 @@ public class CategoryMetadataFieldService {
     public ResponseEntity<BaseVO> getAllMetadataFieldsByCategoryId(String offset, String size, String sortByField, String order, Long categoryId) {
         Optional<Category> savedCategory = categoryRepository.findById(categoryId);
         BaseVO response;
-        Integer pageNo = Integer.parseInt(offset);
-        Integer pageSize = Integer.parseInt(size);
 
-        Pageable pageable;
-        if(order.equals("ascending"))
-            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).ascending());
-        else
-            pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortByField).descending());
-
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not found", "No category exists with this id.", new Date());

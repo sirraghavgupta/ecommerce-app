@@ -24,6 +24,9 @@ public class SellerService {
     private SellerRepository sellerRepository;
 
     @Autowired
+    PagingService pagingService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
@@ -103,11 +106,9 @@ public class SellerService {
         emailService.sendEmail(emailAddress, subject, message);
     }
 
-    public List<SellerAdminApiDto> getAllSellers(String offset, String size, String field) {
-        Integer pageNo = Integer.parseInt(offset);
-        Integer pageSize = Integer.parseInt(size);
+    public List<SellerAdminApiDto> getAllSellers(String offset, String size, String sortByField, String order) {
 
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(field).ascending());
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
         List<Seller> sellers = sellerRepository.findAll(pageable);
         List<SellerAdminApiDto> sellerAdminApiDtos = new ArrayList<>();

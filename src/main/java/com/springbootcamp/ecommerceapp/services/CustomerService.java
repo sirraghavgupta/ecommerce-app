@@ -27,6 +27,9 @@ public class CustomerService {
     private CustomerRepository customerRepository;
 
     @Autowired
+    PagingService pagingService;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -61,11 +64,9 @@ public class CustomerService {
         return customerViewProfileDto;
     }
 
-    public List<CustomerAdminApiDto> getAllCustomers(String offset, String size, String field) {
-        Integer pageNo = Integer.parseInt(offset);
-        Integer pageSize = Integer.parseInt(size);
+    public List<CustomerAdminApiDto> getAllCustomers(String offset, String size, String sortByField, String order) {
 
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(field).ascending());
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
         List<Customer> customers = customerRepository.findAll(pageable);
 

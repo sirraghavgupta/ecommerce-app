@@ -49,6 +49,7 @@ public class AdminController {
     public ResponseEntity<BaseVO> getAllCustomers(@RequestParam(defaultValue = "0") String offset,
                                                   @RequestParam(defaultValue = "10") String size,
                                                   @RequestParam(defaultValue = "id") String sortByField,
+                                                  @RequestParam(defaultValue = "ascending") String order,
                                                   @RequestParam(required = false) String email){
 
         BaseVO response;
@@ -67,7 +68,7 @@ public class AdminController {
             }
         }
         else {
-            list = customerService.getAllCustomers(offset, size, sortByField);
+            list = customerService.getAllCustomers(offset, size, sortByField, order);
             response = new ResponseVO<List>(list, null, new Date());
             responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
         }
@@ -78,6 +79,7 @@ public class AdminController {
     public ResponseEntity<BaseVO> getAllSellers(@RequestParam(defaultValue = "0") String offset,
                                                 @RequestParam(defaultValue = "10") String size,
                                                 @RequestParam(defaultValue = "id") String sortByField,
+                                                @RequestParam(defaultValue = "ascending") String order,
                                                 @RequestParam(required = false) String email) {
 
         BaseVO response;
@@ -96,7 +98,7 @@ public class AdminController {
             }
         }
         else {
-            list = sellerService.getAllSellers(offset, size, sortByField);
+            list = sellerService.getAllSellers(offset, size, sortByField, order);
             response = new ResponseVO<List>(list, null, new Date());
             responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
         }
