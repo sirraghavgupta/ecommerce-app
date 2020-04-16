@@ -54,7 +54,7 @@ public class Bootstrap implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-
+/*
         if(userRepository.count()<1){
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -78,8 +78,6 @@ public class Bootstrap implements ApplicationRunner {
             Admin admin1 = new Admin("draghavgupta.96@gmail.com", "admin", "", "admin");
             admin1.setPassword(passwordEncoder.encode("pass"));
             admin1.addRole(admin);
-            admin1.addRole(seller);
-            admin1.addRole(customer);
             admin1.addAddress(new Address("B-90", "homely", "haryana", "778884", "india", "home"));
             admin1.addAddress(new Address("75/60, ballabgarh", "faridabad", "haryana", "778654", "india", "home"));
             admin1.setActive(true);
@@ -120,6 +118,7 @@ public class Bootstrap implements ApplicationRunner {
             clothing.addSubCategory(women);
 
             categoryRepository.save(fashion);
+
             System.out.println("total categories saved - "+ categoryRepository.count());
 
 
@@ -240,7 +239,13 @@ public class Bootstrap implements ApplicationRunner {
 
 //  ===============================================================================
 
+            Category mobiles = new Category("mobiles");
+            categoryRepository.save(mobiles);
 
-        }
+ */
+//        }
+
+        System.out.println("application went up !!==============================");
     }
 }
+

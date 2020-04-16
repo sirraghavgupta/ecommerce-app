@@ -26,10 +26,10 @@ public class Product {
     private String description;
     private String brand;
 
-    private boolean isReturnable =true;
-    private boolean isCancelleable = true;
-    private boolean isActive = true;
-    private boolean isDeleted = false;
+    private Boolean isReturnable =false;
+    private Boolean isCancelleable = false;
+    private Boolean isActive = false;
+    private Boolean isDeleted = false;
 
     @ManyToOne
     @JoinColumn(name = "seller_user_id")

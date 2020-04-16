@@ -17,13 +17,10 @@ public class StringToMapParser {
 
     public static String toCommaSeparatedString(Set<String> valueSet){
         String values = "";
-        if(valueSet.isEmpty())
+        if(valueSet==null || valueSet.isEmpty())
             return values;
 
-        for(String value : valueSet){
-            values = values + value + ",";
-        }
-        values = values.substring(0, values.length() - 1);
+        values = String.join(",", valueSet);
         return values;
     }
 

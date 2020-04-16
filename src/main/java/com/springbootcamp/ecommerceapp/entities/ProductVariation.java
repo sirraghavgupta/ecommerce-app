@@ -25,9 +25,10 @@ public class ProductVariation {
     private String primaryImageName;
 
     @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> productAttributes;
+    private Map<String, String> productAttributes;
 
     private boolean isDeleted = false;
+    private boolean isActive = true;
 
 
     @ManyToOne(fetch = FetchType.EAGER)

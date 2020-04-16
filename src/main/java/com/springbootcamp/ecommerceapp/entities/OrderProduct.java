@@ -24,7 +24,7 @@ public class OrderProduct {
     private Double price;
 
     @Convert(converter = HashMapConverter.class)
-    private Map<String, Object> productAttributes;
+    private Map<String, String> productAttributes;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
