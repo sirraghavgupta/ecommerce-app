@@ -6,8 +6,12 @@ import com.springbootcamp.ecommerceapp.dtos.ProductVariationSellerDto;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.*;
 import com.springbootcamp.ecommerceapp.utils.*;
+import org.codehaus.jackson.map.Serializers;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,7 +25,7 @@ public class ProductService {
     ProductRepository productRepository;
 
     @Autowired
-    SellerService sellerService;
+    PagingService pagingService;
 
     @Autowired
     EmailService emailService;
@@ -31,6 +35,9 @@ public class ProductService {
 
     @Autowired
     CategoryRepository categoryRepository;
+
+    @Autowired
+    CategoryService categoryService;
 
     @Autowired
     CategoryMetadataFieldRepository fieldRepository;
@@ -60,6 +67,12 @@ public class ProductService {
         if(variationDto==null)
             return null;
         return modelMapper.map(variationDto, ProductVariation.class);
+    }
+
+    public ProductVariationSellerDto toProductVariationSellerDto(ProductVariation variation){
+        if(variation==null)
+            return null;
+        return modelMapper.map(variation, ProductVariationSellerDto.class);
     }
 
     public String validateNewProduct(String email, ProductSellerDto productDto){
@@ -241,17 +254,179 @@ public class ProductService {
         product.setIsActive(true);
         productRepository.save(product);
         String email = product.getSeller().getEmail();
-        sendProductActivationMail(email, product);
+        sendProductActivationDeactivationMail(email, product, true);
 
         message = "success";
         response = new ResponseVO<String>(null, message, new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    private void sendProductActivationMail(String email, Product product) {
-        String subject = "Product activated.";
+    private void sendProductActivationDeactivationMail(String email, Product product, boolean activation) {
+        String subject;
+        if(activation)
+            subject = "Product activated";
+        else
+            subject = "Product deactivated";
+
         String content = "Your product "+product.getName()+" with id - "
                 +product.getId()+" has been activated";
         emailService.sendEmail(email, subject, content);
     }
+
+    public ResponseEntity<BaseVO> deactivateProductById(Long id) {
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            message = "Product with id - "+id+" not found.";
+            response = new ErrorVO("Not Found", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Product product = savedProduct.get();
+        if(!product.getIsActive()){
+            message = "Product with id - "+id+" is already deactivated.";
+            response = new ResponseVO<String>(null, message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        product.setIsActive(false);
+        productRepository.save(product);
+        String email = product.getSeller().getEmail();
+        sendProductActivationDeactivationMail(email, product, false);
+
+        message = "success";
+        response = new ResponseVO<String>(null, message, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> getProductByIdForSeller(Long id, String email) {
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            response = new ErrorVO("Validation failed", "Product with id "+id+ " not found", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        Product product = savedProduct.get();
+        if(!product.getSeller().getEmail().equalsIgnoreCase(email)){
+            message = "Product with id "+id+ " does not belong to you.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if(product.getIsDeleted()){
+            message = "Product does not exist.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+
+        ProductSellerDto productSellerDto = toProductSellerDto(product);
+        productSellerDto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
+
+        response = new ResponseVO<ProductSellerDto>(productSellerDto, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> getAllProductsForSeller(String offset, String size, String sortByField, String order, Long categoryId, String brand) {
+        BaseVO response;
+
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
+
+        List<Product> products;
+        if(categoryId!=null && brand!=null){
+            products = productRepository.findByBrandAndCategoryId(brand, categoryId, pageable);
+        }
+        else if(categoryId!=null){
+            products = productRepository.findByCategoryId(categoryId, pageable);
+        }
+        else if(brand != null){
+            products = productRepository.findByBrand(brand, pageable);
+        }
+        else{
+            products = productRepository.findAll(pageable);
+        }
+
+        List<ProductSellerDto> productDtos = new ArrayList<>();
+        products.forEach(product -> {
+            ProductSellerDto dto = toProductSellerDto(product);
+            dto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
+            productDtos.add(dto);
+        });
+
+        response = new ResponseVO<List>(productDtos, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> getProductVariationByIdForSeller(String email, Long id) {
+        BaseVO response;
+        String message;
+
+        Optional<ProductVariation> savedVariation = variationRepository.findById(id);
+        if(!savedVariation.isPresent()){
+            response = new ErrorVO("Validation failed", "Product variation with id "+id+ " not found", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        ProductVariation variation = savedVariation.get();
+        if(!variation.getProduct().getSeller().getEmail().equalsIgnoreCase(email)){
+            message = "Product variation with id "+id+ " does not belong to you.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if(variation.isDeleted()){
+            message = "Product Variation does not exist.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        ProductVariationSellerDto variationDto = toProductVariationSellerDto(variation);
+        ProductSellerDto productDto = toProductSellerDto(variation.getProduct());
+        productDto.setCategoryDto(categoryService.toCategoryDto(variation.getProduct().getCategory()));
+        variationDto.setProductDto(productDto);
+
+        response = new ResponseVO<ProductVariationSellerDto>(variationDto, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> getAllProductVariationsByProductIdForSeller(String email, Long id, String offset, String size, String sortByField, String order) {
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            response = new ErrorVO("Validation failed", "Product with id "+id+ " not found", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        Product product = savedProduct.get();
+        if(!product.getSeller().getEmail().equalsIgnoreCase(email)){
+            message = "Product with id "+id+ " does not belong to you.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if(product.getIsDeleted()){
+            message = "Product does not exist.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
+
+        List<ProductVariation> variations;
+        variations = variationRepository.findByProductId(id, pageable);
+
+        List<ProductVariationSellerDto> variationDtos = new ArrayList<>();
+        variations.forEach(variation -> {
+            ProductVariationSellerDto variationDto = toProductVariationSellerDto(variation);
+            ProductSellerDto productDto = toProductSellerDto(variation.getProduct());
+            productDto.setCategoryDto(categoryService.toCategoryDto(variation.getProduct().getCategory()));
+            variationDto.setProductDto(productDto);
+            variationDtos.add(variationDto);
+        });
+
+        response = new ResponseVO<List>(variationDtos, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
 }
+

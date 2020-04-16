@@ -32,11 +32,11 @@ public class CustomerController {
     CustomerService customerService;
 
     @GetMapping("/customer/home")
-    public ResponseEntity<ResponseVO> getCustomerHome(){
+    public ResponseEntity<BaseVO> getCustomerHome(){
 
-        List<Product> products = (List)productRepository.findAll();
+        List<Product> products = productRepository.findAll();
         ResponseVO<List> response = new ResponseVO<>(products, null, new Date());
-        return new ResponseEntity<ResponseVO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
     @GetMapping("/customer/profile")

@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductSellerDto {
 
+    private Long id;
+
     @NotNull
     private String name;
 

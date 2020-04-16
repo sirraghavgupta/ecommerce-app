@@ -16,6 +16,8 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductVariationSellerDto {
 
+    private Long id;
+
     @NotNull
     private Long productId;
     private Integer quantityAvailable;
@@ -25,6 +27,6 @@ public class ProductVariationSellerDto {
     @NotNull
     private Map<String, String> attributes = new LinkedHashMap<>();
 
-    private ProductSellerDto product;
+    private ProductSellerDto productDto;
 
 }
