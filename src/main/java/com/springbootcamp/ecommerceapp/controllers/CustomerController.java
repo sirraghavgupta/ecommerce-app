@@ -1,15 +1,13 @@
 package com.springbootcamp.ecommerceapp.controllers;
 
-import com.github.fge.jsonpatch.JsonPatch;
 import com.springbootcamp.ecommerceapp.dtos.AddressDto;
 import com.springbootcamp.ecommerceapp.dtos.CustomerViewProfileDto;
 import com.springbootcamp.ecommerceapp.entities.Product;
-import com.springbootcamp.ecommerceapp.entities.User;
 import com.springbootcamp.ecommerceapp.repos.ProductRepository;
 import com.springbootcamp.ecommerceapp.services.CustomerService;
 import com.springbootcamp.ecommerceapp.services.UserService;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,42 +40,42 @@ public class CustomerController {
     }
 
     @GetMapping("/customer/profile")
-    public ResponseEntity<VO> getProfileDetails(HttpServletRequest request){
+    public ResponseEntity<BaseVO> getProfileDetails(HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return customerService.getUserProfile(username);
     }
 
     @PatchMapping("/customer/profile")
-    public ResponseEntity<VO> updateProfileDetails(@Valid @RequestBody CustomerViewProfileDto profileDto, HttpServletRequest request){
+    public ResponseEntity<BaseVO> updateProfileDetails(@Valid @RequestBody CustomerViewProfileDto profileDto, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return customerService.updateUserProfile(username, profileDto);
     }
 
     @GetMapping("/customer/addresses")
-    public ResponseEntity<VO> getCustomerAddresses(HttpServletRequest request){
+    public ResponseEntity<BaseVO> getCustomerAddresses(HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return customerService.getCustomerAddresses(username);
     }
 
     @PostMapping("/customer/addresses")
-    public ResponseEntity<VO> addNewAddress(@Valid @RequestBody AddressDto addressDto, HttpServletRequest request){
+    public ResponseEntity<BaseVO> addNewAddress(@Valid @RequestBody AddressDto addressDto, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return customerService.addNewAddress(username, addressDto);
     }
 
     @DeleteMapping("/customer/addresses/{id}")
-    public ResponseEntity<VO> deleteAddressById(@PathVariable Long id, HttpServletRequest request){
+    public ResponseEntity<BaseVO> deleteAddressById(@PathVariable Long id, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return customerService.deleteAddress(username, id);
     }
 
     @PatchMapping("/customer/addresses/{id}")
-    public ResponseEntity<VO> updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long id, HttpServletRequest request){
+    public ResponseEntity<BaseVO> updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long id, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return userService.updateAddressById(username, id, addressDto);

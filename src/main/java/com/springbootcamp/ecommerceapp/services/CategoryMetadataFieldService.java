@@ -9,7 +9,7 @@ import com.springbootcamp.ecommerceapp.repos.CategoryMetadataFieldValuesReposito
 import com.springbootcamp.ecommerceapp.repos.CategoryRepository;
 import com.springbootcamp.ecommerceapp.utils.ErrorVO;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -49,23 +49,23 @@ public class CategoryMetadataFieldService {
         return modelMapper.map(field, CategoryMetadataFieldDto.class);
     }
 
-    public ResponseEntity<VO> addNewMetadataField(String fieldName) {
+    public ResponseEntity<BaseVO> addNewMetadataField(String fieldName) {
         CategoryMetadataField savedField = fieldRepository.findByName(fieldName);
-        VO response;
+        BaseVO response;
         if(savedField!=null){
             response = new ErrorVO("Invalid operation", "Field Name already exists", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
         }
 
         savedField = new CategoryMetadataField();
         savedField.setName(fieldName);
         fieldRepository.save(savedField);
         response = new ResponseVO<CategoryMetadataField>(null, "Category metadata field created", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<VO> getAllMetadataFields(String offset, String size, String sortByField, String order) {
-        VO response;
+    public ResponseEntity<BaseVO> getAllMetadataFields(String offset, String size, String sortByField, String order) {
+        BaseVO response;
         Integer pageNo = Integer.parseInt(offset);
         Integer pageSize = Integer.parseInt(size);
 
@@ -85,12 +85,12 @@ public class CategoryMetadataFieldService {
         });
 
         response = new ResponseVO<List>(responseData, null, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> getAllMetadataFieldsByCategoryId(String offset, String size, String sortByField, String order, Long categoryId) {
+    public ResponseEntity<BaseVO> getAllMetadataFieldsByCategoryId(String offset, String size, String sortByField, String order, Long categoryId) {
         Optional<Category> savedCategory = categoryRepository.findById(categoryId);
-        VO response;
+        BaseVO response;
         Integer pageNo = Integer.parseInt(offset);
         Integer pageSize = Integer.parseInt(size);
 
@@ -103,7 +103,7 @@ public class CategoryMetadataFieldService {
 
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not found", "No category exists with this id.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
 
@@ -112,7 +112,7 @@ public class CategoryMetadataFieldService {
 
         if(fieldValues == null || fieldValues.isEmpty()){
             response = new ResponseVO<Set>(null, "No metadata fields are associated with this category.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
         List<CategoryMetadataFieldDto> fields = new ArrayList<>();
@@ -123,6 +123,6 @@ public class CategoryMetadataFieldService {
             fields.add(dto);
         });
         response = new ResponseVO<List>(fields, null, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 }

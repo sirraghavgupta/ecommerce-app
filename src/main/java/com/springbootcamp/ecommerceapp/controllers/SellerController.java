@@ -5,11 +5,10 @@ import com.springbootcamp.ecommerceapp.dtos.SellerViewProfileDto;
 import com.springbootcamp.ecommerceapp.services.SellerService;
 import com.springbootcamp.ecommerceapp.services.UserService;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,21 +33,21 @@ public class SellerController {
     }
 
     @GetMapping("/seller/profile")
-    public ResponseEntity<VO> getProfileDetails(HttpServletRequest request){
+    public ResponseEntity<BaseVO> getProfileDetails(HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return sellerService.getUserProfile(username);
     }
 
     @PatchMapping("/seller/profile")
-    public ResponseEntity<VO> updateProfileDetails(@RequestBody SellerViewProfileDto profileDto, HttpServletRequest request){
+    public ResponseEntity<BaseVO> updateProfileDetails(@RequestBody SellerViewProfileDto profileDto, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return sellerService.updateUserProfile(username, profileDto);
     }
 
     @PatchMapping("/seller/addresses/{id}")
-    public ResponseEntity<VO> updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long id, HttpServletRequest request){
+    public ResponseEntity<BaseVO> updateAddress(@Valid @RequestBody AddressDto addressDto, @PathVariable Long id, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return userService.updateAddressById(username, id, addressDto);

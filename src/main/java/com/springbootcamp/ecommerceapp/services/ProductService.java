@@ -1,22 +1,17 @@
 package com.springbootcamp.ecommerceapp.services;
 
 import com.google.common.collect.Sets;
-import com.google.j2objc.annotations.AutoreleasePool;
 import com.springbootcamp.ecommerceapp.dtos.ProductSellerDto;
 import com.springbootcamp.ecommerceapp.dtos.ProductVariationSellerDto;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.*;
 import com.springbootcamp.ecommerceapp.utils.*;
-import org.aspectj.bridge.IMessage;
-import org.aspectj.bridge.IMessageContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
-import javax.xml.ws.Response;
 import java.util.*;
 
 @Service
@@ -68,7 +63,7 @@ public class ProductService {
     }
 
     public String validateNewProduct(String email, ProductSellerDto productDto){
-        VO response;
+        BaseVO response;
         String message;
 
         Optional<Category> savedCategory = categoryRepository.findById(productDto.getCategoryId());
@@ -97,12 +92,12 @@ public class ProductService {
         return message;
     }
 
-    public ResponseEntity<VO> saveNewProduct(String email, ProductSellerDto productDto) {
-        VO response;
+    public ResponseEntity<BaseVO> saveNewProduct(String email, ProductSellerDto productDto) {
+        BaseVO response;
         String message = validateNewProduct(email, productDto);
         if(!message.equalsIgnoreCase("success")){
             response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         Category category = categoryRepository.findById(productDto.getCategoryId()).get();
@@ -116,7 +111,7 @@ public class ProductService {
         sendProductCreationMail(email, product);
 
         response = new ResponseVO<Product>(null, "Success", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.CREATED);
     }
 
     private void sendProductCreationMail(String email, Product product) {
@@ -129,14 +124,14 @@ public class ProductService {
         emailService.sendEmail(email, subject, content);
     }
 
-    public ResponseEntity<VO> saveNewProductVariation(String email, ProductVariationSellerDto variationDto) {
+    public ResponseEntity<BaseVO> saveNewProductVariation(String email, ProductVariationSellerDto variationDto) {
 
-        VO response;
+        BaseVO response;
         String message = validateNewProductVariation(email, variationDto);
 
         if(!message.equalsIgnoreCase("success")){
             response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         // now we can save the product variation.
@@ -145,11 +140,11 @@ public class ProductService {
 
         message = "success";
         response = new ResponseVO<String>(null, message, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.CREATED);
     }
 
     public String validateNewProductVariation(String email, ProductVariationSellerDto variationDto) {
-        VO response;
+        BaseVO response;
         String message;
 
         Optional<Product> savedProduct = productRepository.findById(variationDto.getProductId());
@@ -225,22 +220,22 @@ public class ProductService {
         return "success";
     }
 
-    public ResponseEntity<VO> activateProductById(Long id) {
-        VO response;
+    public ResponseEntity<BaseVO> activateProductById(Long id) {
+        BaseVO response;
         String message;
 
         Optional<Product> savedProduct = productRepository.findById(id);
         if(!savedProduct.isPresent()){
             message = "Product with id - "+id+" not found.";
             response = new ErrorVO("Not Found", message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         Product product = savedProduct.get();
         if(product.getIsActive()){
             message = "Product with id - "+id+" is already active.";
             response = new ResponseVO<String>(null, message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         product.setIsActive(true);
@@ -250,7 +245,7 @@ public class ProductService {
 
         message = "success";
         response = new ResponseVO<String>(null, message, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
     private void sendProductActivationMail(String email, Product product) {

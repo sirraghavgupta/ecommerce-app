@@ -3,12 +3,10 @@ package com.springbootcamp.ecommerceapp.controllers;
 import com.springbootcamp.ecommerceapp.dtos.ForgotPasswordDto;
 import com.springbootcamp.ecommerceapp.services.UserService;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +29,7 @@ public class UserController {
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<VO> changePassword(@Valid @RequestBody ForgotPasswordDto passwords, HttpServletRequest request){
+    public ResponseEntity<BaseVO> changePassword(@Valid @RequestBody ForgotPasswordDto passwords, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return userService.changePassword(username, passwords);

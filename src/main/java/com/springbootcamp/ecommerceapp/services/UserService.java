@@ -9,7 +9,7 @@ import com.springbootcamp.ecommerceapp.exception.EmailAlreadyExistsException;
 import com.springbootcamp.ecommerceapp.repos.*;
 import com.springbootcamp.ecommerceapp.utils.ErrorVO;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import com.springbootcamp.ecommerceapp.validators.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -134,10 +134,10 @@ public class UserService {
     }
 
     // activate any user - customer or seller
-    public ResponseEntity<VO> activateUserById(Long id, WebRequest request) {
+    public ResponseEntity<BaseVO> activateUserById(Long id, WebRequest request) {
         Optional<User> user = userRepository.findById(id);
-        ResponseEntity<VO> responseEntity;
-        VO response;
+        ResponseEntity<BaseVO> responseEntity;
+        BaseVO response;
         String message, error;
 
         if(!user.isPresent()){
@@ -168,10 +168,10 @@ public class UserService {
     }
 
     // de-activate any user - customer or seller
-    public ResponseEntity<VO> deactivateUserById(Long id, WebRequest request) {
+    public ResponseEntity<BaseVO> deactivateUserById(Long id, WebRequest request) {
         Optional<User> user = userRepository.findById(id);
-        ResponseEntity<VO> responseEntity;
-        VO response;
+        ResponseEntity<BaseVO> responseEntity;
+        BaseVO response;
         String message, error;
 
         if(!user.isPresent()){
@@ -285,9 +285,9 @@ public class UserService {
         emailService.sendEmail(email, subject, message);
     }
 
-    public ResponseEntity<VO> initiatePasswordReset(String email, WebRequest request){
+    public ResponseEntity<BaseVO> initiatePasswordReset(String email, WebRequest request){
         String message, error;
-        VO response;
+        BaseVO response;
 
         // check uniqueness of email
         User user = userRepository.findByEmail(email);
@@ -310,7 +310,7 @@ public class UserService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> createNewCustomer(CustomerRegistrationDto customerDto, WebRequest request){
+    public ResponseEntity<BaseVO> createNewCustomer(CustomerRegistrationDto customerDto, WebRequest request){
         Customer customer = customerRepository.findByEmail(customerDto.getEmail());
 
         if(customer != null)
@@ -324,18 +324,18 @@ public class UserService {
         sendActivationLinkMail(appUrl, savedCustomer, request.getLocale(), "Registration Confirmation");
 
         String message = "Account created successfully. An activation mail has been sent to your email id.";
-        VO response = new ResponseVO<>(null, message, new Date());
+        BaseVO response = new ResponseVO<>(null, message, new Date());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<VO> createNewSeller(SellerRegistrationDto sellerRegistrationDto) {
+    public ResponseEntity<BaseVO> createNewSeller(SellerRegistrationDto sellerRegistrationDto) {
         String message = sellerService.getUniquenessStatus(sellerRegistrationDto);
         String error;
-        VO response;
+        BaseVO response;
         if(!message.equals("unique")){
             error = "Invalid attributes.";
             response = new ErrorVO(error, message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         Seller seller = sellerService.toSeller(sellerRegistrationDto);
@@ -348,18 +348,18 @@ public class UserService {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<VO> resendActivationLink(String email, WebRequest request) {
+    public ResponseEntity<BaseVO> resendActivationLink(String email, WebRequest request) {
         User user = userRepository.findByEmail(email);
         String appUrl = request.getContextPath();
         Locale locale = request.getLocale();
         String error, message;
-        VO response;
+        BaseVO response;
 
         if(user==null){
             error = messages.getMessage("ValidEmail.user.email", null, locale);
             message = "No user found with this email address.";
             response = new ErrorVO(error, message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         VerificationToken token = getVerificationToken(user);
@@ -373,14 +373,14 @@ public class UserService {
         message = messages.getMessage("message.resendToken", null, locale);
         response = new ResponseVO<String>(null, message, new Date());
 
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> activateUserByToken(String token, WebRequest request){
+    public ResponseEntity<BaseVO> activateUserByToken(String token, WebRequest request){
         Locale locale = request.getLocale();
         String message;
         String error;
-        VO response;
+        BaseVO response;
 
         // if token doesn't exist in database
         VerificationToken verificationToken = getVerificationToken(token);
@@ -388,7 +388,7 @@ public class UserService {
             error = messages.getMessage("auth.message.invalidToken", null, locale);
             message = "No user found with given token.";
             response = new ErrorVO(error, message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         // if token is expired
@@ -405,14 +405,14 @@ public class UserService {
             deleteVerificationToken(token);
             sendActivationLinkMail(appUrl, user, locale, "Account Activation Link");
 
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         // if everything is alright
         if(user.isActive()){
             message = "Your account is already active";
             response = new ResponseVO<String>(null, message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.OK);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
         }
 
         user.setActive(true);
@@ -420,13 +420,13 @@ public class UserService {
         deleteVerificationToken(token);
         message = "you have been activated successfully";
         response = new ResponseVO<String>(null, message, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> resetPassword(String token, ForgotPasswordDto passwords, WebRequest request){
+    public ResponseEntity<BaseVO> resetPassword(String token, ForgotPasswordDto passwords, WebRequest request){
         Locale locale = request.getLocale();
         String message, error;
-        VO response;
+        BaseVO response;
 
         // if token doesn't exist in database
         ForgotPasswordToken forgotPasswordToken = getForgotPasswordToken(token);
@@ -462,19 +462,19 @@ public class UserService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> changePassword(String email, ForgotPasswordDto passwords){
+    public ResponseEntity<BaseVO> changePassword(String email, ForgotPasswordDto passwords){
         User user = userRepository.findByEmail(email);
         user.setPassword(passwordEncoder.encode(passwords.getPassword()));
         userRepository.save(user);
         sendPasswordResetConfirmationMail(email);
-        VO response = new ResponseVO<String>(null, "Password changed successfully", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        BaseVO response = new ResponseVO<String>(null, "Password changed successfully", new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> updateAddressById(String email, Long addressId, AddressDto addressDto) {
+    public ResponseEntity<BaseVO> updateAddressById(String email, Long addressId, AddressDto addressDto) {
         Optional<Address> address = addressRepository.findById(addressId);
         User user = userRepository.findByEmail(email);
-        VO response;
+        BaseVO response;
 
         if(!address.isPresent()){
             response = new ErrorVO("Not found", "No address found with this id", new Date());
@@ -483,7 +483,7 @@ public class UserService {
         Address savedAddress = address.get();
         if(!savedAddress.getUser().getEmail().equals(email)){
             response = new ErrorVO("Invalid Operation", "This address doesn't belong to this user.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
         }
 
         // update the address
@@ -506,6 +506,6 @@ public class UserService {
             savedAddress.setLabel(addressDto.getLabel());
 
         response = new ResponseVO<String>("null", "Address has been updated successfully.", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 }

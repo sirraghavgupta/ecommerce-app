@@ -1,19 +1,13 @@
 package com.springbootcamp.ecommerceapp.controllers;
 
 import com.springbootcamp.ecommerceapp.dtos.CustomerAdminApiDto;
-import com.springbootcamp.ecommerceapp.dtos.CustomerRegistrationDto;
 import com.springbootcamp.ecommerceapp.dtos.SellerAdminApiDto;
-import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
-import com.springbootcamp.ecommerceapp.entities.Customer;
-import com.springbootcamp.ecommerceapp.entities.Product;
-import com.springbootcamp.ecommerceapp.entities.Seller;
 import com.springbootcamp.ecommerceapp.services.ProductService;
 import com.springbootcamp.ecommerceapp.services.CustomerService;
 import com.springbootcamp.ecommerceapp.services.SellerService;
 import com.springbootcamp.ecommerceapp.services.UserService;
-import com.springbootcamp.ecommerceapp.utils.ErrorVO;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +15,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -47,20 +39,20 @@ public class AdminController {
 
 
     @GetMapping("/admin/home")
-    public ResponseEntity<VO> getAdminHome(){
+    public ResponseEntity<BaseVO> getAdminHome(){
         String message = "Admin home";
-        VO response = new ResponseVO<>(null, message, new Date());
+        BaseVO response = new ResponseVO<>(null, message, new Date());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/customers")
-    public ResponseEntity<VO> getAllCustomers(@RequestParam(defaultValue = "0") String offset,
-                                              @RequestParam(defaultValue = "10") String size,
-                                              @RequestParam(defaultValue = "id") String sortByField,
-                                              @RequestParam(required = false) String email){
+    public ResponseEntity<BaseVO> getAllCustomers(@RequestParam(defaultValue = "0") String offset,
+                                                  @RequestParam(defaultValue = "10") String size,
+                                                  @RequestParam(defaultValue = "id") String sortByField,
+                                                  @RequestParam(required = false) String email){
 
-        VO response;
-        ResponseEntity<VO> responseEntity;
+        BaseVO response;
+        ResponseEntity<BaseVO> responseEntity;
         List<CustomerAdminApiDto> list = new ArrayList<>();
         if(email!=null){
             CustomerAdminApiDto customerAdminApiDto = customerService.getCustomerByEmail(email);
@@ -83,13 +75,13 @@ public class AdminController {
     }
 
     @GetMapping("/sellers")
-    public ResponseEntity<VO> getAllSellers(@RequestParam(defaultValue = "0") String offset,
-                                                 @RequestParam(defaultValue = "10") String size,
-                                                 @RequestParam(defaultValue = "id") String sortByField,
-                                                 @RequestParam(required = false) String email) {
+    public ResponseEntity<BaseVO> getAllSellers(@RequestParam(defaultValue = "0") String offset,
+                                                @RequestParam(defaultValue = "10") String size,
+                                                @RequestParam(defaultValue = "id") String sortByField,
+                                                @RequestParam(required = false) String email) {
 
-        VO response;
-        ResponseEntity<VO> responseEntity;
+        BaseVO response;
+        ResponseEntity<BaseVO> responseEntity;
         List<SellerAdminApiDto> list = new ArrayList<>();
         if(email!=null){
             SellerAdminApiDto sellerAdminApiDto = sellerService.getSellerByEmail(email);
@@ -120,12 +112,12 @@ public class AdminController {
 
 
     @PutMapping("/activate/{id}")
-    public ResponseEntity<VO> activateUser(@PathVariable Long id, WebRequest request){
+    public ResponseEntity<BaseVO> activateUser(@PathVariable Long id, WebRequest request){
         return userService.activateUserById(id, request);
     }
 
     @PutMapping("/deactivate/{id}")
-    public ResponseEntity<VO> deactivateUser(@PathVariable Long id, WebRequest request){
+    public ResponseEntity<BaseVO> deactivateUser(@PathVariable Long id, WebRequest request){
         return userService.deactivateUserById(id, request);
     }
 

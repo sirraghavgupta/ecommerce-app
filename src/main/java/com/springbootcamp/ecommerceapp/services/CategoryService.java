@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.management.modelmbean.DescriptorSupport;
 import java.util.*;
 
 @Service
@@ -98,12 +97,12 @@ public class CategoryService {
         return "valid";
     }
 
-    public ResponseEntity<VO> createNewCategory(String categoryName, Long parentId) {
-        VO response;
+    public ResponseEntity<BaseVO> createNewCategory(String categoryName, Long parentId) {
+        BaseVO response;
         String message = validateNewCategory(categoryName, parentId);
         if(!message.equals("valid")){
             response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         Category category = new Category(categoryName);
@@ -116,7 +115,7 @@ public class CategoryService {
             Optional<Category> parentCategory = categoryRepository.findById(parentId);
             if(!parentCategory.isPresent()){
                 response = new ErrorVO("Invalid input", "Parent category not found", new Date());
-                return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+                return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
             }
             else{
                 parent = parentCategory.get();
@@ -126,7 +125,7 @@ public class CategoryService {
             }
         }
         response = new ResponseVO<Category>(null, "Success", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.CREATED);
     }
 
     public CategoryAdminResponseDto toCategoryAdminResponseDto(Category category){
@@ -163,22 +162,22 @@ public class CategoryService {
         return categoryAdminResponseDto;
     }
 
-    public ResponseEntity<VO> getCategoryAllDetails(Long categoryId) {
-        VO response;
+    public ResponseEntity<BaseVO> getCategoryAllDetails(Long categoryId) {
+        BaseVO response;
         Optional<Category> preStored = categoryRepository.findById(categoryId);
         if(!preStored.isPresent()){
             response = new ErrorVO("Not Found", "Category with given id does not exist.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
         CategoryAdminResponseDto categoryAdminResponseDto = toCategoryAdminResponseDto(preStored.get());
 
         response = new ResponseVO<CategoryAdminResponseDto>(categoryAdminResponseDto, null, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> getAllCategories(String offset, String size, String sortByField, String order) {
-        VO response;
+    public ResponseEntity<BaseVO> getAllCategories(String offset, String size, String sortByField, String order) {
+        BaseVO response;
         Integer pageNo = Integer.parseInt(offset);
         Integer pageSize = Integer.parseInt(size);
 
@@ -196,11 +195,11 @@ public class CategoryService {
         });
 
         response = new ResponseVO<List>(categoryDtos, null, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> getAllCategoriesForSeller() {
-        VO response;
+    public ResponseEntity<BaseVO> getAllCategoriesForSeller() {
+        BaseVO response;
         List<Category> categories = categoryRepository.findAll();
         List<CategoryAdminResponseDto> categoryDtos = new ArrayList<>();
 
@@ -209,11 +208,11 @@ public class CategoryService {
         });
 
         response = new ResponseVO<List>(categoryDtos, null, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> getAllCategoriesForCustomer(Long id) {
-        VO response;
+    public ResponseEntity<BaseVO> getAllCategoriesForCustomer(Long id) {
+        BaseVO response;
         if(id==null) {
             List<Category> rootCategories = categoryRepository.findByParentIdIsNull();
             List<CategoryDto> categoryDtos = new ArrayList<>();
@@ -221,12 +220,12 @@ public class CategoryService {
                 categoryDtos.add(toCategoryDtoNonRecursive(e));
             });
             response = new ResponseVO<List>(categoryDtos, null, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.OK);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
         }
         Optional<Category> savedCategory = categoryRepository.findById(id);
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not Found", "Category does not exist.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
         Category category = savedCategory.get();
@@ -237,15 +236,15 @@ public class CategoryService {
             subCategoryDtos.add(toCategoryDtoNonRecursive(e));
         });
         response = new ResponseVO<List>(subCategoryDtos, null, new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> deleteCategoryById(Long id) {
-        VO response;
+    public ResponseEntity<BaseVO> deleteCategoryById(Long id) {
+        BaseVO response;
         Optional<Category> savedCategory = categoryRepository.findById(id);
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not Found", "Category does not exist.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
         Category category = savedCategory.get();
@@ -253,28 +252,28 @@ public class CategoryService {
         if(!category.getProducts().isEmpty()){
             response = new ErrorVO("Validation failed", "This category " +
                     "is associated with some products.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
         }
 
         if(!category.getSubCategories().isEmpty()){
             response = new ErrorVO("Validation failed", "This category " +
                     "has child categories.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
         }
 
 //        deleteCategory(category);
         categoryRepository.deleteCategoryById(id);
 
         response = new ResponseVO<String>(null, "Success", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> updateCategory(Long id, String name) {
-        VO response;
+    public ResponseEntity<BaseVO> updateCategory(Long id, String name) {
+        BaseVO response;
         Optional<Category> savedCategory = categoryRepository.findById(id);
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not Found", "Category does not exist.", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
         Category category = savedCategory.get();
@@ -282,22 +281,22 @@ public class CategoryService {
         categoryRepository.save(category);
 
         response = new ResponseVO<String>(null, "Success", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> addMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
-        VO response;
+    public ResponseEntity<BaseVO> addMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
+        BaseVO response;
         String message = validateCategoryMetadataFieldDto(fieldValueDtos, "creation");
         if(!message.equalsIgnoreCase("success")){
             response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         return createMetadataFieldValuePair(fieldValueDtos);
     }
 
     public String validateCategoryMetadataFieldDto(MetadataFieldValueInsertDto fieldValueDtos, String purpose) {
-        VO response;
+        BaseVO response;
         String message;
 
         Optional<Category> savedCategory = categoryRepository.findById(fieldValueDtos.getCategoryId());
@@ -332,8 +331,8 @@ public class CategoryService {
         return message;
     }
 
-    public ResponseEntity<VO> createMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
-        VO response;
+    public ResponseEntity<BaseVO> createMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
+        BaseVO response;
         Category category = categoryRepository.findById(fieldValueDtos.getCategoryId()).get();
         CategoryMetadataFieldValues categoryFieldValues = new CategoryMetadataFieldValues();
         CategoryMetadataField categoryField;
@@ -350,15 +349,15 @@ public class CategoryService {
             valuesRepository.save(categoryFieldValues);
         }
         response = new ResponseVO<String>(null, "Success", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<VO> updateMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
-        VO response;
+    public ResponseEntity<BaseVO> updateMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
+        BaseVO response;
         String message = validateCategoryMetadataFieldDto(fieldValueDtos, "creation");
         if(!message.equalsIgnoreCase("success")){
             response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         Category category = categoryRepository.findById(fieldValueDtos.getCategoryId()).get();
@@ -398,7 +397,7 @@ public class CategoryService {
             valuesRepository.save(metadataFieldValue);
         }
         response = new ResponseVO<String>(null, "Success", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
 

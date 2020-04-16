@@ -12,11 +12,11 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class VO {
+public class BaseVO {
     private String message;
     private Date timestamp;
 
-    public VO(String message, Date timestamp) {
+    public BaseVO(String message, Date timestamp) {
         this.message = message;
         this.timestamp = timestamp;
     }

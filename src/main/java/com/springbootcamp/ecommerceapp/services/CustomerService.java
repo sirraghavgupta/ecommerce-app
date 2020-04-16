@@ -1,32 +1,23 @@
 package com.springbootcamp.ecommerceapp.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import com.springbootcamp.ecommerceapp.dtos.*;
 import com.springbootcamp.ecommerceapp.entities.Address;
 import com.springbootcamp.ecommerceapp.entities.Customer;
-import com.springbootcamp.ecommerceapp.entities.User;
 import com.springbootcamp.ecommerceapp.repos.AddressRepository;
 import com.springbootcamp.ecommerceapp.repos.CustomerRepository;
 import com.springbootcamp.ecommerceapp.utils.ErrorVO;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
-import org.hibernate.type.CustomType;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.*;
 
 @Service
@@ -92,17 +83,17 @@ public class CustomerService {
         return customerAdminApiDto;
     }
 
-    public ResponseEntity<VO> getUserProfile(String email) {
+    public ResponseEntity<BaseVO> getUserProfile(String email) {
         Customer customer = customerRepository.findByEmail(email);
-        VO response;
+        BaseVO response;
         CustomerViewProfileDto customerViewProfileDto = toCustomerViewProfileDto(customer);
         response = new ResponseVO<CustomerViewProfileDto>(customerViewProfileDto, null, new Date());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> getCustomerAddresses(String email) {
+    public ResponseEntity<BaseVO> getCustomerAddresses(String email) {
         Customer customer = customerRepository.findByEmail(email);
-        VO response;
+        BaseVO response;
         Set<AddressDto> addressDtos = new HashSet<>();
         Set<Address> addresses = customer.getAddresses();
 
@@ -113,18 +104,18 @@ public class CustomerService {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> addNewAddress(String email, AddressDto addressDto) {
-        VO response;
+    public ResponseEntity<BaseVO> addNewAddress(String email, AddressDto addressDto) {
+        BaseVO response;
         Customer customer = customerRepository.findByEmail(email);
         Address newAddress = addressService.toAddress(addressDto);
         customer.addAddress(newAddress);
         customerRepository.save(customer);
         response = new ResponseVO<String>(null, "success", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.CREATED);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<VO> deleteAddress(String email, Long id) {
-        VO response;
+    public ResponseEntity<BaseVO> deleteAddress(String email, Long id) {
+        BaseVO response;
         Optional<Address> optAddress = addressRepository.findById(id);
         if(!optAddress.isPresent()){
             response = new ErrorVO("Not found", "No address found with this id", new Date());
@@ -134,13 +125,13 @@ public class CustomerService {
         if(savedAddress.getUser().getEmail().equals(email)){
             addressRepository.deleteAddressById(id);
             response = new ResponseVO<String>("null", "Success", new Date());
-            return new ResponseEntity<VO>(response, HttpStatus.OK);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
         }
         response = new ErrorVO("Invalid Operation", "This address doesn't belong to this user.", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.CONFLICT);
+        return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
     }
 
-    public ResponseEntity<VO> updateUserProfile(String email, CustomerViewProfileDto profileDto) {
+    public ResponseEntity<BaseVO> updateUserProfile(String email, CustomerViewProfileDto profileDto) {
         Customer savedCustomer = customerRepository.findByEmail(email);
         if(profileDto.getFirstName() != null)
             savedCustomer.setFirstName(profileDto.getFirstName());
@@ -159,8 +150,8 @@ public class CustomerService {
 
         customerRepository.save(savedCustomer);
 
-        VO response = new ResponseVO<String>("null", "Your profile has been updated.", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        BaseVO response = new ResponseVO<String>("null", "Your profile has been updated.", new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
 }

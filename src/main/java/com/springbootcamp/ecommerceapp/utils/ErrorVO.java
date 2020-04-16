@@ -1,7 +1,6 @@
 package com.springbootcamp.ecommerceapp.utils;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ErrorVO extends VO{
+public class ErrorVO extends BaseVO {
 
     private String error;
 

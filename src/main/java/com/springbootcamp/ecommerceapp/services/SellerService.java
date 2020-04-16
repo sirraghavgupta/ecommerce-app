@@ -2,11 +2,10 @@ package com.springbootcamp.ecommerceapp.services;
 
 import com.springbootcamp.ecommerceapp.dtos.*;
 import com.springbootcamp.ecommerceapp.entities.Address;
-import com.springbootcamp.ecommerceapp.entities.Customer;
 import com.springbootcamp.ecommerceapp.entities.Seller;
 import com.springbootcamp.ecommerceapp.repos.SellerRepository;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -14,9 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -128,15 +124,15 @@ public class SellerService {
         return sellerAdminApiDto;
     }
 
-    public ResponseEntity<VO> getUserProfile(String email) {
+    public ResponseEntity<BaseVO> getUserProfile(String email) {
         Seller seller = sellerRepository.findByEmail(email);
-        VO response;
+        BaseVO response;
         SellerViewProfileDto sellerViewProfileDto = toSellerViewProfileDto(seller);
         response = new ResponseVO<SellerViewProfileDto>(sellerViewProfileDto, null, new Date());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    public ResponseEntity<VO> updateUserProfile(String email, SellerViewProfileDto profileDto) {
+    public ResponseEntity<BaseVO> updateUserProfile(String email, SellerViewProfileDto profileDto) {
         Seller savedSeller = sellerRepository.findByEmail(email);
 
         if(profileDto.getFirstName() != null)
@@ -162,7 +158,7 @@ public class SellerService {
 
         sellerRepository.save(savedSeller);
 
-        VO response = new ResponseVO<String>("null", "Your profile has been updated", new Date());
-        return new ResponseEntity<VO>(response, HttpStatus.OK);
+        BaseVO response = new ResponseVO<String>("null", "Your profile has been updated", new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 }

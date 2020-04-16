@@ -3,7 +3,7 @@ package com.springbootcamp.ecommerceapp.controllers;
 import com.springbootcamp.ecommerceapp.dtos.ForgotPasswordDto;
 import com.springbootcamp.ecommerceapp.services.UserService;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
-import com.springbootcamp.ecommerceapp.utils.VO;
+import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -36,26 +36,26 @@ public class LoginLogoutController {
 
 
     @PostMapping("/doLogout")
-    public ResponseEntity<VO> logout(HttpServletRequest request){
+    public ResponseEntity<BaseVO> logout(HttpServletRequest request){
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null) {
             String tokenValue = authHeader.replace("Bearer", "").trim();
             OAuth2AccessToken accessToken = tokenStore.readAccessToken(tokenValue);
             tokenStore.removeAccessToken(accessToken);
         }
-        VO response = new ResponseVO<String>(null, "You have been logged out successfully", new Date());
+        BaseVO response = new ResponseVO<String>(null, "You have been logged out successfully", new Date());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<VO> getResetPasswordToken(@RequestBody String email, WebRequest request){
+    public ResponseEntity<BaseVO> getResetPasswordToken(@RequestBody String email, WebRequest request){
         return userService.initiatePasswordReset(email, request);
     }
 
 
     @PutMapping("/reset-password")
-    public ResponseEntity<VO> resetPassword(@RequestParam("token") String token, @Valid @RequestBody ForgotPasswordDto passwords, WebRequest request){
+    public ResponseEntity<BaseVO> resetPassword(@RequestParam("token") String token, @Valid @RequestBody ForgotPasswordDto passwords, WebRequest request){
         return userService.resetPassword(token, passwords, request);
     }
 }

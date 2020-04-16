@@ -9,7 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResponseVO<T> extends VO{
+public class ResponseVO<T> extends BaseVO {
 
     private T data;
 
