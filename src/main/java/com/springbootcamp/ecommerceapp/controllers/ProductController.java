@@ -135,4 +135,19 @@ public class ProductController {
         return productService.getAllSimilarProductsByProductId(productId, offset, size, sortByField, order);
     }
 
+    @GetMapping("/admin/product/{productId}")
+    public ResponseEntity<BaseVO> getProductByIdForAdmin(@PathVariable Long productId){
+        return productService.getProductByIdForAdmin(productId);
+    }
+
+    @GetMapping("/admin/products")
+    public ResponseEntity<BaseVO> getProductByIdForAdmin(@RequestParam(defaultValue = "0") String offset,
+                                                         @RequestParam(defaultValue = "10") String size,
+                                                         @RequestParam(defaultValue = "id") String sortByField,
+                                                         @RequestParam(defaultValue = "ascending") String order,
+                                                         @RequestParam(required = false) Long categoryId,
+                                                         @RequestParam(required = false) String brand){
+        return productService.getAllProductsForAdmin(categoryId, offset, size, sortByField, order, brand);
+    }
+
 }

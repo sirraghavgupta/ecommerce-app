@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +23,9 @@ public class ProductVariationSellerDto {
     private Long productId;
     private Integer quantityAvailable;
     private Double price;
-    private Set<String> images;
+
+    private String primaryImage;
+    private List<String> secondaryImages;
 
     @NotNull
     private Map<String, String> attributes = new LinkedHashMap<>();

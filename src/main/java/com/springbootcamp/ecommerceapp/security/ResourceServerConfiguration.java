@@ -73,6 +73,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/categories/seller").hasAnyRole("SELLER","ADMIN")
                 .antMatchers("/metadata-field-values").hasAnyRole("ADMIN")
                 .antMatchers("/seller/**").hasAnyRole("SELLER","ADMIN")
+                .antMatchers("/admin/**").hasAnyRole("ADMIN")
                 .antMatchers("/product/deactivate/{id}").hasAnyRole("ADMIN")
                 .antMatchers("/product/activate/{id}").hasAnyRole("ADMIN")
                 .antMatchers("/swagger-ui.html").anonymous()

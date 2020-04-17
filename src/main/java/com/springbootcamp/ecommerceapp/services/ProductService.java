@@ -799,5 +799,71 @@ public class ProductService {
         response = new ResponseVO<Set>(similarProducts, null, new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
+
+    public ResponseEntity<BaseVO> getProductByIdForAdmin(Long id){
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            message = "Product with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Product product = savedProduct.get();
+
+        if(product.getIsDeleted()){
+            message = "Product with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        ProductAdminViewDto productAdminViewDto = new ProductAdminViewDto();
+        ProductSellerDto productDto = toProductSellerDto(product);
+        productDto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
+        productAdminViewDto.setProductDto(productDto);
+        // add primary images of all the variations in this dto.
+
+        response = new ResponseVO<ProductAdminViewDto>(productAdminViewDto, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> getAllProductsForAdmin(Long categoryId, String offset, String size, String sortByField, String order, String brand) {
+        BaseVO response;
+
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
+
+        List<Product> products;
+        if(categoryId!=null && brand!=null){
+            products = productRepository.findByBrandAndCategoryId(brand, categoryId, pageable);
+        }
+        else if(categoryId!=null){
+            products = productRepository.findByCategoryId(categoryId, pageable);
+        }
+        else if(brand != null){
+            products = productRepository.findByBrand(brand, pageable);
+        }
+        else{
+            products = productRepository.findAll(pageable);
+        }
+
+        List<ProductAdminViewDto> productDtos = new ArrayList<>();
+        products.forEach(product -> {
+            ProductAdminViewDto viewDto = new ProductAdminViewDto();
+            ProductSellerDto dto = toProductSellerDto(product);
+            dto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
+            viewDto.setProductDto(dto);
+            productDtos.add(viewDto);
+            // u need to add the images of variations as well here.
+        });
+
+        response = new ResponseVO<List>(productDtos, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+
+
+
 }
 
