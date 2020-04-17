@@ -2,7 +2,9 @@ package com.springbootcamp.ecommerceapp.services;
 
 import com.google.common.collect.Sets;
 import com.springbootcamp.ecommerceapp.dtos.ProductSellerDto;
+import com.springbootcamp.ecommerceapp.dtos.ProductUpdateDto;
 import com.springbootcamp.ecommerceapp.dtos.ProductVariationSellerDto;
+import com.springbootcamp.ecommerceapp.dtos.ProductVariationUpdateDto;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.*;
 import com.springbootcamp.ecommerceapp.utils.*;
@@ -16,7 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -47,6 +52,9 @@ public class ProductService {
 
     @Autowired
     ProductVariationRepository variationRepository;
+
+    @Autowired
+    ProductReviewRepository reviewRepository;
 
     @Autowired
     ModelMapper modelMapper;
@@ -226,7 +234,7 @@ public class ProductService {
             Set<String> receivedValueSet = StringToMapParser.toSetOfValues(receivedValues);
 
             if(!Sets.difference(receivedValueSet, actualValueSet).isEmpty()){
-                message = "Invalid values found for field "+receivedField;
+                message = "Invalid value found for field "+receivedField;
                 return message;
             }
         }
@@ -427,6 +435,234 @@ public class ProductService {
 
         response = new ResponseVO<List>(variationDtos, null, new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> deleteProductById(Long id, String email) {
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            response = new ErrorVO("Validation failed", "Product with id "+id+ " not found", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        Product product = savedProduct.get();
+        if(!product.getSeller().getEmail().equalsIgnoreCase(email)){
+            message = "Product with id "+id+ " does not belong to you.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if(product.getIsDeleted()){
+            message = "Product does not exist.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        reviewRepository.deleteByProductId(id);
+        variationRepository.deleteByProductId(id);
+        productRepository.deleteProductById(id);
+
+        response = new ResponseVO<String>(null,"success", new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> validateProductUpdate(Long id, String email, ProductUpdateDto productDto){
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            message = "Product with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        Product product = savedProduct.get();
+        if(!product.getSeller().getEmail().equalsIgnoreCase(email)){
+            message = "Product with id "+id+ " does not belong to you.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if(product.getIsDeleted()){
+            message = "Product does not exist.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        if(productDto.getName() != null){
+            Product duplicateProduct = productRepository.findByName(productDto.getName());
+            if(duplicateProduct!=null){
+                if(duplicateProduct.getCategory().getId().equals(product.getCategory().getId())){
+                    if(duplicateProduct.getBrand().equalsIgnoreCase(product.getBrand())){
+                        if(duplicateProduct.getSeller().getEmail().equalsIgnoreCase(email)){
+                            message = "Product with similar details already exists.";
+                            response = new ErrorVO("Validation failed", message, new Date());
+                            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public ResponseEntity<BaseVO> updateProductByProductId(Long id, String email, ProductUpdateDto productDto) {
+        BaseVO response;
+        String message;
+
+        ResponseEntity<BaseVO> validationResult = validateProductUpdate(id, email, productDto);
+        if(validationResult != null){
+            return validationResult;
+        }
+
+        Product product = productRepository.findById(id).get();
+        applyProductUpdateDtoToProduct(product, productDto);
+        productRepository.save(product);
+
+        response = new ResponseVO<String>(null, "success", new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public void applyProductUpdateDtoToProduct(Product product, ProductUpdateDto productDto) {
+
+        if(productDto.getName() != null)
+            product.setName(productDto.getName());
+
+        if(productDto.getDescription() != null)
+            product.setDescription(productDto.getDescription());
+
+        if(productDto.getIsReturnable() != null)
+            product.setIsReturnable(productDto.getIsReturnable());
+
+        if(productDto.getIsCancelleable() != null)
+            product.setIsCancelleable(productDto.getIsCancelleable());
+
+    }
+
+    public ResponseEntity<BaseVO> validateProductVariationUpdate(Long id, String email, ProductVariationUpdateDto variationDto) {
+        BaseVO response;
+        String message;
+
+        Optional<ProductVariation> savedVariation = variationRepository.findById(id);
+        if(!savedVariation.isPresent()){
+            message = "Product variation with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        ProductVariation variation = savedVariation.get();
+
+        if(variation.isDeleted()){
+            message = "Product variation does not exist.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        if(!variation.getProduct().getIsActive()){
+            message = "Parent product is inactive.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if(!variation.getProduct().getSeller().getEmail().equalsIgnoreCase(email)){
+            message = "Product variation does not belong to you.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+
+        }
+        if( variationDto.getQuantityAvailable()!=null && variationDto.getQuantityAvailable()<=0){
+            message = "Quantity should be greater than 0.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if( variationDto.getPrice()!=null && variationDto.getPrice()<=0){
+            message = "Price should be greater than 0";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        // check if all the fields are actually related to the product category.
+        Map<String, String> attributes = variationDto.getAttributes();
+        if(attributes!=null){
+            Category category = variation.getProduct().getCategory();
+            List<String> receivedFields = new ArrayList<>(attributes.keySet());
+            List<String> actualFields = new ArrayList<>();
+            valuesRepository.findAllFieldsOfCategoryById(category.getId())
+                    .forEach((e)->{
+                        actualFields.add(e[0].toString());
+                    });
+
+            receivedFields.removeAll(actualFields);
+            if(!receivedFields.isEmpty()){
+                message = "Invalid fields found in the data.";
+                response = new ErrorVO("Validation failed", message, new Date());
+                return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            // check validity of values of fields.
+            List<String> receivedFieldsCopy = new ArrayList<>(attributes.keySet());
+
+            for (String receivedField : receivedFieldsCopy) {
+
+                CategoryMetadataField field = fieldRepository.findByName(receivedField);
+                List<Object> savedValues = valuesRepository.findAllValuesOfCategoryField(category.getId(), field.getId());
+
+                String values = savedValues.get(0).toString();
+                Set<String> actualValueSet = StringToMapParser.toSetOfValues(values);
+
+                String receivedValues = attributes.get(receivedField);
+                Set<String> receivedValueSet = StringToMapParser.toSetOfValues(receivedValues);
+
+                if(!Sets.difference(receivedValueSet, actualValueSet).isEmpty()){
+                    message = "Invalid value found for field "+receivedField;
+                    response = new ErrorVO("Validation failed", message, new Date());
+                    return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+                }
+            }
+
+        }
+        return null;
+    }
+
+    public ResponseEntity<BaseVO> updateProductVariationById(Long id, String email, ProductVariationUpdateDto variationDto) {
+        BaseVO response;
+        String message;
+
+        ResponseEntity<BaseVO> validationResponse = validateProductVariationUpdate(id, email, variationDto);
+        if(validationResponse!=null)
+            return validationResponse;
+
+        ProductVariation variation = variationRepository.findById(id).get();
+
+        // now we can save the product variation.
+        applyProductVariationUpdateDtoToProductVariation(variation, variationDto);
+        variationRepository.save(variation);
+
+        message = "success";
+        response = new ResponseVO<String>(null, message, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+
+    }
+
+    private void applyProductVariationUpdateDtoToProductVariation(ProductVariation variation, ProductVariationUpdateDto variationDto) {
+
+        if(variationDto.getQuantityAvailable()!=null)
+            variation.setQuantityAvailable(variationDto.getQuantityAvailable());
+
+        if(variationDto.getPrice() != null)
+            variation.setPrice(variationDto.getPrice());
+
+        if(variationDto.getIsActive() != null)
+            variation.setActive(variationDto.getIsActive());
+
+        if(variationDto.getAttributes() != null){
+            Map<String, String> newAttributes = variationDto.getAttributes();
+            if(!newAttributes.isEmpty()){
+                Map<String, String> oldAttributes = variation.getProductAttributes();
+
+                for(String key : newAttributes.keySet()){
+                    String newValue = newAttributes.get(key);
+                    oldAttributes.put(key, newValue);
+                }
+            }
+        }
     }
 }
 

@@ -1,9 +1,12 @@
 package com.springbootcamp.ecommerceapp.controllers;
 
 import com.springbootcamp.ecommerceapp.dtos.ProductSellerDto;
+import com.springbootcamp.ecommerceapp.dtos.ProductUpdateDto;
 import com.springbootcamp.ecommerceapp.dtos.ProductVariationSellerDto;
+import com.springbootcamp.ecommerceapp.dtos.ProductVariationUpdateDto;
 import com.springbootcamp.ecommerceapp.services.ProductService;
 import com.springbootcamp.ecommerceapp.utils.BaseVO;
+import org.codehaus.jackson.map.Serializers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +34,23 @@ public class ProductController {
         return productService.getProductByIdForSeller(id, email);
     }
 
+    @DeleteMapping("/seller/product/{id}")
+    public ResponseEntity<BaseVO> deleteProductById(@PathVariable Long id, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String email = principal.getName();
+        return productService.deleteProductById(id, email);
+    }
+
+
+
+    @PatchMapping("/seller/product/{productId}")
+    public ResponseEntity<BaseVO> updateProductById(@PathVariable Long productId, @RequestBody ProductUpdateDto productDto, HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String email = principal.getName();
+        return productService.updateProductByProductId(productId, email, productDto);
+    }
+
+
     @GetMapping("/seller/products")
     public ResponseEntity<BaseVO> getAllProductsForSeller(@RequestParam(defaultValue = "0") String offset,
                                         @RequestParam(defaultValue = "10") String size,
@@ -46,6 +66,16 @@ public class ProductController {
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return productService.saveNewProductVariation(username, variationDto);
+    }
+
+    @PatchMapping("/seller/product-variation/{variationId}")
+    public ResponseEntity<BaseVO> updateProductVariationById(
+                                             @PathVariable Long variationId,
+                                             @RequestBody ProductVariationUpdateDto variationDto,
+                                             HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String email = principal.getName();
+        return productService.updateProductVariationById(variationId, email, variationDto);
     }
 
     @GetMapping("/seller/product-variations/{productId}")
@@ -69,6 +99,7 @@ public class ProductController {
         return productService.getProductVariationByIdForSeller(email, id);
     }
 
+
     @PutMapping("/product/activate/{id}")
     public ResponseEntity<BaseVO> activateProduct(@PathVariable Long id){
         return productService.activateProductById(id);
@@ -79,3 +110,4 @@ public class ProductController {
         return productService.deactivateProductById(id);
     }
 }
+
