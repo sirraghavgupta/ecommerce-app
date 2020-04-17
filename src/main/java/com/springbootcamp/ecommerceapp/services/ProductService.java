@@ -740,16 +740,6 @@ public class ProductService {
         return productCustomerViewDto;
     }
 
-//    public Set<ProductCustomerViewDto> getAllProductCustomerViewDtosByCategory(Long categoryId){
-//        Set<ProductCustomerViewDto> productCustomerViewDtos = new HashSet<>();
-//
-//        List<Product> products = productRepository.findByCategoryId(categoryId);
-//        products.forEach((product)->{
-//            productCustomerViewDtos.add(getProductCustomerViewDto(product));
-//        });
-//        return productCustomerViewDtos;
-//    }
-
     public Set<ProductCustomerViewDto> getAllProductCustomerViewDtosByCategory(Long categoryId, Pageable pageable){
         Set<ProductCustomerViewDto> productCustomerViewDtos = new LinkedHashSet<>();
 
@@ -767,6 +757,47 @@ public class ProductService {
             }
         }
         return productCustomerViewDtos;
+    }
+
+    public ResponseEntity<BaseVO> getAllSimilarProductsByProductId(Long id, String offset, String size, String sortByField, String order) {
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            message = "Product with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Product product = savedProduct.get();
+
+        if(product.getIsDeleted()){
+            message = "Product with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        if(!product.getIsActive()){
+            message = "Product is inactive.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Category category = product.getCategory();
+
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
+
+        Set<ProductCustomerViewDto> similarProducts = getAllProductCustomerViewDtosByCategory(category.getId(), pageable);
+        similarProducts.remove(getProductCustomerViewDto(product));
+
+        if(similarProducts.isEmpty()){
+            message = "No similar products found.";
+            response = new ResponseVO<Set>(similarProducts, message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+        }
+
+        response = new ResponseVO<Set>(similarProducts, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 }
 

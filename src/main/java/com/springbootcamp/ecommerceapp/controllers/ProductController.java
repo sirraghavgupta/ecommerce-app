@@ -124,5 +124,15 @@ public class ProductController {
                                                             @RequestParam(defaultValue = "ascending") String order){
         return productService.getAllProductsByCategoryIdForCustomer(categoryId, offset, size, sortByField, order);
     }
-}
 
+    @GetMapping("/customer/similar-products/{productId}")
+    public ResponseEntity<BaseVO> getSimilarProductsByProductIdForCustomer(@PathVariable Long productId,
+                                                                        @RequestParam(defaultValue = "0") String offset,
+                                                                        @RequestParam(defaultValue = "10") String size,
+                                                                        @RequestParam(defaultValue = "id") String sortByField,
+                                                                        @RequestParam(defaultValue = "ascending") String order){
+
+        return productService.getAllSimilarProductsByProductId(productId, offset, size, sortByField, order);
+    }
+
+}
