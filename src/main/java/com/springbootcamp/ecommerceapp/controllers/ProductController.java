@@ -109,5 +109,20 @@ public class ProductController {
     public ResponseEntity<BaseVO> deactivateProduct(@PathVariable Long id){
         return productService.deactivateProductById(id);
     }
+
+
+    @GetMapping("/customer/product/{productId}")
+    public ResponseEntity<BaseVO> getProductForCustomer(@PathVariable Long productId){
+        return productService.getProductByIdForCustomer(productId);
+    }
+
+    @GetMapping("/customer/products/{categoryId}")
+    public ResponseEntity<BaseVO> getAllProductsByCategoryIdForCustomer(@PathVariable Long categoryId,
+                                                            @RequestParam(defaultValue = "0") String offset,
+                                                            @RequestParam(defaultValue = "10") String size,
+                                                            @RequestParam(defaultValue = "id") String sortByField,
+                                                            @RequestParam(defaultValue = "ascending") String order){
+        return productService.getAllProductsByCategoryIdForCustomer(categoryId, offset, size, sortByField, order);
+    }
 }
 

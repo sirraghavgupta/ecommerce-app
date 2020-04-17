@@ -1,10 +1,7 @@
 package com.springbootcamp.ecommerceapp.services;
 
 import com.google.common.collect.Sets;
-import com.springbootcamp.ecommerceapp.dtos.ProductSellerDto;
-import com.springbootcamp.ecommerceapp.dtos.ProductUpdateDto;
-import com.springbootcamp.ecommerceapp.dtos.ProductVariationSellerDto;
-import com.springbootcamp.ecommerceapp.dtos.ProductVariationUpdateDto;
+import com.springbootcamp.ecommerceapp.dtos.*;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.*;
 import com.springbootcamp.ecommerceapp.utils.*;
@@ -19,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.text.html.Option;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -663,6 +661,112 @@ public class ProductService {
                 }
             }
         }
+    }
+
+    public ResponseEntity<BaseVO> getProductByIdForCustomer(Long id){
+        BaseVO response;
+        String message;
+
+        Optional<Product> savedProduct = productRepository.findById(id);
+        if(!savedProduct.isPresent()){
+            message = "Product with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        Product product = savedProduct.get();
+
+        if(product.getIsDeleted()){
+            message = "Product with id "+id+ " not found";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+        if(!product.getIsActive()){
+            message = "Product is inactive.";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+        if(product.getVariations()==null || product.getVariations().isEmpty()){
+            message = "No variations available for this product";
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        // now we are ready to return the product/
+        ProductCustomerViewDto productCustomerViewDto = getProductCustomerViewDto(product);
+
+        response = new ResponseVO<ProductCustomerViewDto>(productCustomerViewDto, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<BaseVO> getAllProductsByCategoryIdForCustomer(Long categoryId, String offset, String size, String sortByField, String order) {
+
+        BaseVO response;
+        String message;
+
+        Optional<Category> savedCategory = categoryRepository.findById(categoryId);
+        if(!savedCategory.isPresent()){
+            message = "Category with id - " + categoryId + " does not exist.";
+            response = new ErrorVO("Not found.", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Category category= savedCategory.get();
+        Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
+        Set<ProductCustomerViewDto> productCustomerViewDtos;
+
+        productCustomerViewDtos = getAllProductCustomerViewDtosByCategory(categoryId, pageable);
+
+        response = new ResponseVO<Set>(productCustomerViewDtos, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+
+    }
+
+    public ProductCustomerViewDto getProductCustomerViewDto(Product product){
+        ProductSellerDto productDto = toProductSellerDto(product);
+        productDto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
+
+        Set<ProductVariationSellerDto> variationDtos = new HashSet<>();
+        product.getVariations().forEach((variation -> {
+            ProductVariationSellerDto variationDto = toProductVariationSellerDto(variation);
+            variationDto.setProductDto(null);
+            variationDtos.add(variationDto);
+        }));
+
+        ProductCustomerViewDto productCustomerViewDto = new ProductCustomerViewDto();
+
+        productCustomerViewDto.setProductDto(productDto);
+        productCustomerViewDto.setVariations(variationDtos);
+
+        return productCustomerViewDto;
+    }
+
+//    public Set<ProductCustomerViewDto> getAllProductCustomerViewDtosByCategory(Long categoryId){
+//        Set<ProductCustomerViewDto> productCustomerViewDtos = new HashSet<>();
+//
+//        List<Product> products = productRepository.findByCategoryId(categoryId);
+//        products.forEach((product)->{
+//            productCustomerViewDtos.add(getProductCustomerViewDto(product));
+//        });
+//        return productCustomerViewDtos;
+//    }
+
+    public Set<ProductCustomerViewDto> getAllProductCustomerViewDtosByCategory(Long categoryId, Pageable pageable){
+        Set<ProductCustomerViewDto> productCustomerViewDtos = new LinkedHashSet<>();
+
+        Category category = categoryRepository.findById(categoryId).get();
+
+        if(category.getSubCategories() == null || category.getSubCategories().isEmpty()){
+            List<Product> products = productRepository.findByCategoryId(categoryId, pageable);
+            for (Product product : products) {
+                productCustomerViewDtos.add(getProductCustomerViewDto(product));
+            }
+        }
+        else{
+            for(Category child : category.getSubCategories()){
+                productCustomerViewDtos.addAll(getAllProductCustomerViewDtosByCategory(child.getId(), pageable));
+            }
+        }
+        return productCustomerViewDtos;
     }
 }
 
