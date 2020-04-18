@@ -26,4 +26,13 @@ public interface CategoryMetadataFieldValuesRepository extends CrudRepository<Ca
             "v.category_id = :c_id", nativeQuery = true)
     List<Object> findAllValuesOfCategoryField(@Param("c_id") Long c_id, @Param("f_id") Long f_id);
 
+
+    @Query(value = "select f.name, v.value from " +
+            "category_metadata_field f " +
+            "inner join " +
+            "category_metadata_field_values v " +
+            "on f.id = category_metadata_field_id " +
+            "where v.category_id = :c_id", nativeQuery = true)
+    List<Object[]> findAllFieldsAndValuesForLeafCategory(@Param("c_id") Long c_id);
+
 }

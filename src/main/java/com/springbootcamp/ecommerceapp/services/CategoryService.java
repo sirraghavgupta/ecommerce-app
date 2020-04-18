@@ -1,16 +1,11 @@
 package com.springbootcamp.ecommerceapp.services;
 
-import com.springbootcamp.ecommerceapp.dtos.CategoryAdminResponseDto;
-import com.springbootcamp.ecommerceapp.dtos.CategoryDto;
-import com.springbootcamp.ecommerceapp.dtos.CategoryMetadataFieldDto;
-import com.springbootcamp.ecommerceapp.dtos.MetadataFieldValueInsertDto;
-import com.springbootcamp.ecommerceapp.entities.Category;
-import com.springbootcamp.ecommerceapp.entities.CategoryMetadataField;
-import com.springbootcamp.ecommerceapp.entities.CategoryMetadataFieldValues;
-import com.springbootcamp.ecommerceapp.entities.Product;
+import com.springbootcamp.ecommerceapp.dtos.*;
+import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.CategoryMetadataFieldRepository;
 import com.springbootcamp.ecommerceapp.repos.CategoryMetadataFieldValuesRepository;
 import com.springbootcamp.ecommerceapp.repos.CategoryRepository;
+import com.springbootcamp.ecommerceapp.repos.ProductRepository;
 import com.springbootcamp.ecommerceapp.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +29,9 @@ public class CategoryService {
 
     @Autowired
     PagingService pagingService;
+
+    @Autowired
+    ProductRepository productRepository;
 
     @Autowired
     CategoryMetadataFieldRepository fieldRepository;
@@ -396,6 +394,135 @@ public class CategoryService {
         response = new ResponseVO<String>(null, "Success", new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
+
+    public ResponseEntity<BaseVO> getFilteringDetailsForCategory(Long categoryId){
+        BaseVO response;
+
+        Optional<Category> savedCategory = categoryRepository.findById(categoryId);
+        if(!savedCategory.isPresent()){
+            response = new ErrorVO("Not Found", "Category with id " + categoryId +" does not exist.", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        }
+
+        Category category = savedCategory.get();
+        CategoryFilteringDetailsDto filterDto = new CategoryFilteringDetailsDto();
+
+        PricePair pair = new PricePair();
+        pair.minPrice = Double.POSITIVE_INFINITY;
+        pair.maxPrice = 0d;
+        getMinMaxPriceForCategory(category, pair);
+
+        Map<String, String> map = new HashMap<>();
+        getAllFieldValuePairsForCategory(category, map);
+
+        Map<String, Set<String>> fieldValueMap = new HashMap<>();
+        map.forEach((field, value)->{
+            fieldValueMap.put(field, StringToMapParser.toSetOfValues(value));
+        });
+
+        filterDto.setBrands(getAllBrandsForCategory(categoryId));
+        filterDto.setMaxPrice(pair.maxPrice);
+        filterDto.setMinPrice(pair.minPrice);
+        filterDto.setFieldValues(fieldValueMap);
+
+        response = new ResponseVO<CategoryFilteringDetailsDto>(filterDto, null, new Date());
+        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
+    }
+
+    public Set<String> getAllBrandsForCategory(Long categoryId) {
+        Optional<Category> savedCategory = categoryRepository.findById(categoryId);
+        if(!savedCategory.isPresent())
+            return null;
+
+        Set<String> brands = new HashSet<>();
+        Category category = savedCategory.get();
+
+        if(category.getSubCategories()==null || category.getSubCategories().isEmpty()){
+            brands.addAll(productRepository.findAllBrandsByCategoryId(categoryId));
+        }
+        else{
+            category.getSubCategories().forEach(child->{
+                brands.addAll(getAllBrandsForCategory(child.getId()));
+            });
+        }
+        return brands;
+    }
+
+    public void getMinMaxPriceForCategory(Category category, PricePair pair){
+        // assuming that category already exists
+
+        // if its a leaf category - iterate over the products
+        if(category.getSubCategories() == null || category.getSubCategories().isEmpty()){
+
+            // if category has some products
+            if(category.getProducts()!=null && category.getProducts().isEmpty()==false){
+                Set<Product> products = category.getProducts();
+                for (Product product : products) {
+
+                    // if product has some variations
+                    if(product.getVariations()!=null && product.getVariations().isEmpty()==false){
+                        Set<ProductVariation> variations = product.getVariations();
+
+                        for (ProductVariation variation : variations) {
+                            if(variation.getPrice() < pair.minPrice) {
+                                pair.minPrice = variation.getPrice();
+                                System.out.println("minPrice found"  + pair.minPrice);
+                            }
+
+                            if(variation.getPrice() > pair.maxPrice){
+                                pair.maxPrice = variation.getPrice();
+                                System.out.println("maxPrice found" + pair.maxPrice);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        else {
+            // now if category is a parent category
+            Set<Category> subCategories = category.getSubCategories();
+            for (Category subCategory : subCategories) {
+                getMinMaxPriceForCategory(subCategory, pair);
+            }
+        }
+
+    }
+
+    public void getAllFieldValuePairsForCategory(Category category, Map<String, String> fieldValueMap){
+
+        // assume that the category exists. check before calling the method.
+
+        if(category.getSubCategories() != null && !category.getSubCategories().isEmpty()){
+
+            Set<Category> subCategories = category.getSubCategories();
+            for(Category child : subCategories){
+                getAllFieldValuePairsForCategory(child, fieldValueMap);
+            }
+        }
+
+        else{
+            List<Object[]> fieldValuePairs =
+                    valuesRepository.findAllFieldsAndValuesForLeafCategory(category.getId());
+
+            Set<String> fields = fieldValueMap.keySet();
+
+            for(Object[] pair : fieldValuePairs){
+                if(fields.contains(pair[0].toString())){
+                    String values = fieldValueMap.get(pair[0].toString());
+                    values = values + "," +pair[1];
+                    fieldValueMap.put(pair[0].toString(), values);
+                }
+                else{
+                    fieldValueMap.put(pair[0].toString(), pair[1].toString());
+                }
+            }
+        }
+    }
+
+
+
+
 
 
 

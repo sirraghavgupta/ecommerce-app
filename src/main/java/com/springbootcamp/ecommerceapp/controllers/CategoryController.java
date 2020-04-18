@@ -88,5 +88,9 @@ public class CategoryController {
         return categoryService.getAllCategoriesForCustomer(id);
     }
 
+    @GetMapping("/category/filtering-details/{categoryId}")
+    public ResponseEntity<BaseVO> getFilteringDetailsForCategory(@PathVariable Long categoryId){
+        return categoryService.getFilteringDetailsForCategory(categoryId);
+    }
 
 }
