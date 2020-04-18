@@ -3,7 +3,7 @@ package com.springbootcamp.ecommerceapp.utils;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StringToMapParser {
+public class StringToSetParser {
 
     public static Set<String> toSetOfValues(String value){
         Set<String> values = new HashSet<>();

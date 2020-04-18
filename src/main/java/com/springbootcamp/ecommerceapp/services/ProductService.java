@@ -5,19 +5,13 @@ import com.springbootcamp.ecommerceapp.dtos.*;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.repos.*;
 import com.springbootcamp.ecommerceapp.utils.*;
-import org.codehaus.jackson.map.Serializers;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.swing.text.html.Option;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -226,10 +220,10 @@ public class ProductService {
             List<Object> savedValues = valuesRepository.findAllValuesOfCategoryField(category.getId(), field.getId());
 
             String values = savedValues.get(0).toString();
-            Set<String> actualValueSet = StringToMapParser.toSetOfValues(values);
+            Set<String> actualValueSet = StringToSetParser.toSetOfValues(values);
 
             String receivedValues = attributes.get(receivedField);
-            Set<String> receivedValueSet = StringToMapParser.toSetOfValues(receivedValues);
+            Set<String> receivedValueSet = StringToSetParser.toSetOfValues(receivedValues);
 
             if(!Sets.difference(receivedValueSet, actualValueSet).isEmpty()){
                 message = "Invalid value found for field "+receivedField;
@@ -603,10 +597,10 @@ public class ProductService {
                 List<Object> savedValues = valuesRepository.findAllValuesOfCategoryField(category.getId(), field.getId());
 
                 String values = savedValues.get(0).toString();
-                Set<String> actualValueSet = StringToMapParser.toSetOfValues(values);
+                Set<String> actualValueSet = StringToSetParser.toSetOfValues(values);
 
                 String receivedValues = attributes.get(receivedField);
-                Set<String> receivedValueSet = StringToMapParser.toSetOfValues(receivedValues);
+                Set<String> receivedValueSet = StringToSetParser.toSetOfValues(receivedValues);
 
                 if(!Sets.difference(receivedValueSet, actualValueSet).isEmpty()){
                     message = "Invalid value found for field "+receivedField;

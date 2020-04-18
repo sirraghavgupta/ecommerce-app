@@ -9,9 +9,7 @@ import com.springbootcamp.ecommerceapp.repos.ProductRepository;
 import com.springbootcamp.ecommerceapp.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -155,7 +153,7 @@ public class CategoryService {
 
             category.getFieldValues().forEach((e) -> {
                 CategoryMetadataFieldDto dto = fieldService.toCategoryMetadataFieldDto(e.getCategoryMetadataField());
-                dto.setValues(StringToMapParser.toSetOfValues(e.getValue()));
+                dto.setValues(StringToSetParser.toSetOfValues(e.getValue()));
                 fieldValues.add(dto);
             });
             categoryAdminResponseDto.setFieldValues(fieldValues);
@@ -335,7 +333,7 @@ public class CategoryService {
         for(CategoryMetadataFieldDto fieldValuePair : fieldValueDtos.getFieldValues()){
 
             categoryField = fieldRepository.findById(fieldValuePair.getId()).get();
-            String values = StringToMapParser.toCommaSeparatedString(fieldValuePair.getValues());
+            String values = StringToSetParser.toCommaSeparatedString(fieldValuePair.getValues());
 
             categoryFieldValues.setValue(values);
             categoryFieldValues.setCategory(category);
@@ -372,7 +370,7 @@ public class CategoryService {
             if(savedMetadataFieldValue.isPresent()){
                 metadataFieldValue = savedMetadataFieldValue.get();
                 values = metadataFieldValue.getValue();
-                valueSet = StringToMapParser.toSetOfValues(values);
+                valueSet = StringToSetParser.toSetOfValues(values);
             }
             else{
                 metadataFieldValue = new CategoryMetadataFieldValues();
@@ -383,7 +381,7 @@ public class CategoryService {
                 valueSet.add(value);
             }
 
-            values = StringToMapParser.toCommaSeparatedString(valueSet);
+            values = StringToSetParser.toCommaSeparatedString(valueSet);
 
             metadataFieldValue.setValue(values);
             metadataFieldValue.setCategoryMetadataField(field);
@@ -417,7 +415,7 @@ public class CategoryService {
 
         Map<String, Set<String>> fieldValueMap = new HashMap<>();
         map.forEach((field, value)->{
-            fieldValueMap.put(field, StringToMapParser.toSetOfValues(value));
+            fieldValueMap.put(field, StringToSetParser.toSetOfValues(value));
         });
 
         filterDto.setBrands(getAllBrandsForCategory(categoryId));
@@ -519,11 +517,6 @@ public class CategoryService {
             }
         }
     }
-
-
-
-
-
 
 
 //    private void deleteCategory(Category category) {
