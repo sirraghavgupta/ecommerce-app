@@ -7,6 +7,7 @@ import com.springbootcamp.ecommerceapp.dtos.SellerRegistrationDto;
 import com.springbootcamp.ecommerceapp.entities.*;
 import com.springbootcamp.ecommerceapp.exception.EmailAlreadyExistsException;
 import com.springbootcamp.ecommerceapp.repos.*;
+import com.springbootcamp.ecommerceapp.security.AppUser;
 import com.springbootcamp.ecommerceapp.utils.ErrorVO;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
 import com.springbootcamp.ecommerceapp.utils.BaseVO;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -67,6 +70,18 @@ public class UserService {
 
     @Autowired
     private TokenStore tokenStore;
+
+    public User getCurrentLoggedInUser()
+    {
+        AppUser user=null;
+        User user1=null;
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        user = (AppUser) securityContext.getAuthentication().getPrincipal();
+
+        user1 = userRepository.findByEmail(user.getUsername());
+
+        return user1;
+    }
 
     public String createVerificationToken(User user){
         String token = UUID.randomUUID().toString();

@@ -79,6 +79,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/category/filtering-details").hasAnyRole("CUSTOMER")
                 .antMatchers("/swagger-ui.html").anonymous()
                 .antMatchers("/v2/api-docs").anonymous()
+                .antMatchers("/user/image", "/product-variation/images/{variationId}", "/product-variation/image/{variationId}", "/downloadImage/{fileName:.+}").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

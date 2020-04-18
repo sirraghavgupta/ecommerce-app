@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -24,4 +25,7 @@ public interface ProductVariationRepository extends CrudRepository<ProductVariat
     @Transactional
     @Query(value = "delete from product_variation where product_id = :p_id", nativeQuery = true)
     void deleteByProductId(@Param("p_id") Long p_id);
+
+    @Query(value = "SELECT * FROM hibernate_sequence limit 1", nativeQuery = true)
+    BigDecimal getNextValMySequence();
 }
