@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
@@ -13,6 +14,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
+@Where(clause = "is_deleted='false'")
 public class CategoryMetadataFieldValues extends AuditInformation{
 
     @EmbeddedId
@@ -27,6 +29,7 @@ public class CategoryMetadataFieldValues extends AuditInformation{
     private CategoryMetadataField categoryMetadataField;
 
     private String value;
+    private Boolean isDeleted = false;
 
     public CategoryMetadataFieldValues(String value) {
         this.value = value;

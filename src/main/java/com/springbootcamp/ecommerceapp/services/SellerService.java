@@ -64,7 +64,7 @@ public class SellerService {
     }
 
     public boolean isEmailUnique(String email){
-        Seller seller = sellerRepository.findByEmail(email);
+        Seller seller = sellerRepository.findByEmailAndIsDeletedFalse(email);
         if(seller != null)
             return false;
 
@@ -72,14 +72,14 @@ public class SellerService {
     }
 
     public boolean isGSTUnique(String GST){
-        Seller seller = sellerRepository.findByGST(GST);
+        Seller seller = sellerRepository.findByGSTAndIsDeletedFalse(GST);
         if(seller != null)
             return false;
 
         return true;
     }
     public boolean isCompanyNameUnique(String name){
-        Seller seller = sellerRepository.findByCompanyName(name);
+        Seller seller = sellerRepository.findByCompanyNameAndIsDeletedFalse(name);
         if(seller != null)
             return false;
 
@@ -126,7 +126,7 @@ public class SellerService {
     }
 
     public ResponseEntity<BaseVO> getUserProfile(String email) {
-        Seller seller = sellerRepository.findByEmail(email);
+        Seller seller = sellerRepository.findByEmailAndIsDeletedFalse(email);
         BaseVO response;
         SellerViewProfileDto sellerViewProfileDto = toSellerViewProfileDto(seller);
         response = new ResponseVO<SellerViewProfileDto>(sellerViewProfileDto, null, new Date());
@@ -134,7 +134,7 @@ public class SellerService {
     }
 
     public ResponseEntity<BaseVO> updateUserProfile(String email, SellerViewProfileDto profileDto) {
-        Seller savedSeller = sellerRepository.findByEmail(email);
+        Seller savedSeller = sellerRepository.findByEmailAndIsDeletedFalse(email);
 
         if(profileDto.getFirstName() != null)
             savedSeller.setFirstName(profileDto.getFirstName());

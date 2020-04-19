@@ -15,6 +15,6 @@ public interface ProductReviewRepository extends CrudRepository<ProductReview, P
 
     @Modifying
     @Transactional
-    @Query(value = "delete from product_review where product_id = :p_id", nativeQuery = true)
+    @Query(value = "update product_review set is_deleted=true where product_id = :p_id", nativeQuery = true)
     void deleteByProductId(@Param("p_id") Long p_id);
 }

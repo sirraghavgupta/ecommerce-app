@@ -158,7 +158,7 @@ public class ImageService {
             }
 
             // generate path for the image
-            ProductVariation variation = variationRepository.findById(id).get();
+            ProductVariation variation = variationRepository.findByIdAndIsDeletedFalse(id).get();
 
             String directoryPath = fileStorageProperties.getUploadDir() + "/products/" +
                                     variation.getProduct().getId() + "/variations/" + variation.getId();
@@ -230,7 +230,7 @@ public class ImageService {
             }
 
             // generate path for the image
-            ProductVariation variation = variationRepository.findById(id).get();
+            ProductVariation variation = variationRepository.findByIdAndIsDeletedFalse(id).get();
 
             String directoryPath = fileStorageProperties.getUploadDir() + "/products/" +
                     variation.getProduct().getId() + "/variations/" + variation.getId();

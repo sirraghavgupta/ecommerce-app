@@ -41,9 +41,7 @@ public class ImageController {
     @PostMapping("/user/image")
     public BaseVO uploadImage(@RequestBody() MultipartFile file, HttpServletRequest request) {
         BaseVO response;
-
         String email = request.getUserPrincipal().getName();
-
         return imageService.storeUserProfileImage(file, email);
     }
 
@@ -51,7 +49,7 @@ public class ImageController {
     @PostMapping("/product-variation/images/{variationId}")
     public List<BaseVO> uploadSecondaryImagesForProductVariation(@PathVariable Long variationId, @RequestBody MultipartFile[] files) {
 
-        Optional<ProductVariation> variation = variationRepository.findById(variationId);
+        Optional<ProductVariation> variation = variationRepository.findByIdAndIsDeletedFalse(variationId);
         if(!variation.isPresent()){
             return Arrays.asList(new ErrorVO("Validation failed.", "Product variation does not exist", new Date()));
         }
@@ -66,7 +64,7 @@ public class ImageController {
     @PostMapping("/product-variation/image/{variationId}")
     public BaseVO uploadPrimaryImageForProductVariation(@PathVariable Long variationId, @RequestBody MultipartFile file) {
 
-        Optional<ProductVariation> variation = variationRepository.findById(variationId);
+        Optional<ProductVariation> variation = variationRepository.findByIdAndIsDeletedFalse(variationId);
         if(!variation.isPresent()){
             return new ErrorVO("Validation failed.", "Product variation does not exist", new Date());
         }

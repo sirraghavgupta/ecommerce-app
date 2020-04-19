@@ -8,21 +8,20 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends CrudRepository<Customer, Long> {
 
-    Customer findByEmail(String email);
+    Optional<Customer> findById(Long id);
 
+    Customer findByEmail(String email);
     Customer findByEmailAndIsDeletedFalse(String email);
 
     List<Customer> findAll();
     List<Customer> findAll(Pageable pageable);
 
-//    @Query(value = "select * from customer where is_deleted=false", nativeQuery = true)
     List<Customer> findByIsDeletedFalse();
-
-//    @Query(value = "select * from customer where is_deleted=false", nativeQuery = true)
     List<Customer> findByIsDeletedFalse(Pageable pageable);
 
 

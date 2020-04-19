@@ -150,7 +150,7 @@ public class UserService {
 
     // activate any user - customer or seller
     public ResponseEntity<BaseVO> activateUserById(Long id, WebRequest request) {
-        Optional<User> user = userRepository.findById(id);
+        Optional<User> user = userRepository.findByIdAndIsDeletedFalse(id);
         ResponseEntity<BaseVO> responseEntity;
         BaseVO response;
         String message, error;
@@ -184,7 +184,7 @@ public class UserService {
 
     // de-activate any user - customer or seller
     public ResponseEntity<BaseVO> deactivateUserById(Long id, WebRequest request) {
-        Optional<User> user = userRepository.findById(id);
+        Optional<User> user = userRepository.findByIdAndIsDeletedFalse(id);
         ResponseEntity<BaseVO> responseEntity;
         BaseVO response;
         String message, error;
@@ -228,7 +228,7 @@ public class UserService {
 //    }
 
     public User getUserByEmail(String email){
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailAndIsDeletedFalse(email);
 
         if(user==null)
             System.out.println("user not found");
@@ -305,7 +305,7 @@ public class UserService {
         BaseVO response;
 
         // check uniqueness of email
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailAndIsDeletedFalse(email);
         if(user==null)
             throw new UsernameNotFoundException("This email address does not exist.");
 
@@ -326,7 +326,7 @@ public class UserService {
     }
 
     public ResponseEntity<BaseVO> createNewCustomer(CustomerRegistrationDto customerDto, WebRequest request){
-        Customer customer = customerRepository.findByEmail(customerDto.getEmail());
+        Customer customer = customerRepository.findByEmailAndIsDeletedFalse(customerDto.getEmail());
 
         if(customer != null)
             throw new EmailAlreadyExistsException("email id already exists");
@@ -364,7 +364,7 @@ public class UserService {
     }
 
     public ResponseEntity<BaseVO> resendActivationLink(String email, WebRequest request) {
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailAndIsDeletedFalse(email);
         String appUrl = request.getContextPath();
         Locale locale = request.getLocale();
         String error, message;
@@ -478,7 +478,7 @@ public class UserService {
     }
 
     public ResponseEntity<BaseVO> changePassword(String email, ForgotPasswordDto passwords){
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmailAndIsDeletedFalse(email);
         user.setPassword(passwordEncoder.encode(passwords.getPassword()));
         userRepository.save(user);
         sendPasswordResetConfirmationMail(email);

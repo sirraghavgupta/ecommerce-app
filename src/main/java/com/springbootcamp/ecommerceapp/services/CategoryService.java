@@ -7,6 +7,7 @@ import com.springbootcamp.ecommerceapp.repos.CategoryMetadataFieldValuesReposito
 import com.springbootcamp.ecommerceapp.repos.CategoryRepository;
 import com.springbootcamp.ecommerceapp.repos.ProductRepository;
 import com.springbootcamp.ecommerceapp.utils.*;
+import org.aspectj.weaver.patterns.PerObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,9 @@ public class CategoryService {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ProductService productService;
 
     @Autowired
     CategoryMetadataFieldRepository fieldRepository;
@@ -58,21 +62,25 @@ public class CategoryService {
     }
 
     private String validateNewCategory(String categoryName, Long parentId) {
+        if(categoryName==null || categoryName.equalsIgnoreCase("")){
+            return "category name not valid.";
+        }
+
         if(parentId == null){
-            Category preStored = categoryRepository.findByName(categoryName);
+            Category preStored = categoryRepository.findByNameAndIsDeletedFalse(categoryName);
             if(preStored == null)
                 return "valid";
             return "Category already exists. So, can not insert at the root level.";
         }
 
         // check uniqueness at the root level
-        List<Category> preStored = categoryRepository.findByParentIdIsNull();
+        List<Category> preStored = categoryRepository.findByParentIdIsNullAndIsDeletedFalse();
         for(Category c : preStored){
             if(c.getName().equalsIgnoreCase(categoryName))
                 return "Category already exists at the root level.";
         }
 
-        Category parent = categoryRepository.findById(parentId).get();
+        Category parent = categoryRepository.findByIdAndIsDeletedFalse(parentId).get();
 
         // check immediate children
         Set<Category> children = parent.getSubCategories();
@@ -111,7 +119,7 @@ public class CategoryService {
             categoryRepository.save(category);
         }
         else{
-            Optional<Category> parentCategory = categoryRepository.findById(parentId);
+            Optional<Category> parentCategory = categoryRepository.findByIdAndIsDeletedFalse(parentId);
             if(!parentCategory.isPresent()){
                 response = new ErrorVO("Invalid input", "Parent category not found", new Date());
                 return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
@@ -163,7 +171,7 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> getCategoryAllDetails(Long categoryId) {
         BaseVO response;
-        Optional<Category> preStored = categoryRepository.findById(categoryId);
+        Optional<Category> preStored = categoryRepository.findByIdAndIsDeletedFalse(categoryId);
         if(!preStored.isPresent()){
             response = new ErrorVO("Not Found", "Category with given id does not exist.", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
@@ -180,7 +188,7 @@ public class CategoryService {
 
         Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
-        List<Category> categories = categoryRepository.findAll(pageable);
+        List<Category> categories = categoryRepository.findByIsDeletedFalse(pageable);
         List<CategoryAdminResponseDto> categoryDtos = new ArrayList<>();
 
         categories.forEach((category)->{
@@ -193,7 +201,7 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> getAllCategoriesForSeller() {
         BaseVO response;
-        List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findByIsDeletedFalse();
         List<CategoryAdminResponseDto> categoryDtos = new ArrayList<>();
 
         categories.forEach((category)->{
@@ -207,7 +215,7 @@ public class CategoryService {
     public ResponseEntity<BaseVO> getAllCategoriesForCustomer(Long id) {
         BaseVO response;
         if(id==null) {
-            List<Category> rootCategories = categoryRepository.findByParentIdIsNull();
+            List<Category> rootCategories = categoryRepository.findByParentIdIsNullAndIsDeletedFalse();
             List<CategoryDto> categoryDtos = new ArrayList<>();
             rootCategories.forEach((e) -> {
                 categoryDtos.add(toCategoryDtoNonRecursive(e));
@@ -215,7 +223,7 @@ public class CategoryService {
             response = new ResponseVO<List>(categoryDtos, null, new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
         }
-        Optional<Category> savedCategory = categoryRepository.findById(id);
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(id);
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not Found", "Category does not exist.", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
@@ -234,28 +242,26 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> deleteCategoryById(Long id) {
         BaseVO response;
-        Optional<Category> savedCategory = categoryRepository.findById(id);
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(id);
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not Found", "Category does not exist.", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
-        Category category = savedCategory.get();
-
-        if(!category.getProducts().isEmpty()){
-            response = new ErrorVO("Validation failed", "This category " +
-                    "is associated with some products.", new Date());
-            return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
+        List<Category> subCategories = categoryRepository.findAllSubCategoriesByCategoryId(id);
+        if(subCategories!=null && !subCategories.isEmpty()){
+            response = new ErrorVO("Validation failed", "Category with " + id + " is a parent category.", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
-        if(!category.getSubCategories().isEmpty()){
-            response = new ErrorVO("Validation failed", "This category " +
-                    "has child categories.", new Date());
-            return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);
+        List<Product> products = productRepository.findByCategoryIdAndIsDeletedFalse(id);
+        if(products!=null && !products.isEmpty()){
+            response = new ErrorVO("Validation failed", "Category with " + id +
+                            " has some products associated with it.", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
-//        deleteCategory(category);
-        categoryRepository.deleteCategoryById(id);
+        deleteCategoryByCategoryId(id);
 
         response = new ResponseVO<String>(null, "Success", new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
@@ -263,13 +269,12 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> updateCategory(Long id, String name) {
         BaseVO response;
-        Optional<Category> savedCategory = categoryRepository.findById(id);
-        if(!savedCategory.isPresent()){
-            response = new ErrorVO("Not Found", "Category does not exist.", new Date());
-            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+        String message = validateCategoryUpdate(id, name);
+        if(!message.equals("valid")){
+            response = new ErrorVO("Validation failed", message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
-
-        Category category = savedCategory.get();
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(id).get();
         category.setName(name);
         categoryRepository.save(category);
 
@@ -292,7 +297,7 @@ public class CategoryService {
         BaseVO response;
         String message;
 
-        Optional<Category> savedCategory = categoryRepository.findById(fieldValueDtos.getCategoryId());
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(fieldValueDtos.getCategoryId());
         if(!savedCategory.isPresent()){
             message = "Category does not exist.";
             return message;
@@ -300,7 +305,7 @@ public class CategoryService {
 
         Category category = savedCategory.get();
         for(CategoryMetadataFieldDto fieldValuePair : fieldValueDtos.getFieldValues()){
-            Optional<CategoryMetadataField> field = fieldRepository.findById(fieldValuePair.getId());
+            Optional<CategoryMetadataField> field = fieldRepository.findByIdAndIsDeletedFalse(fieldValuePair.getId());
             if(!field.isPresent()){
                 message = "Field id "+fieldValuePair.getId()+" not found";
                 return message;
@@ -326,13 +331,13 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> createMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
         BaseVO response;
-        Category category = categoryRepository.findById(fieldValueDtos.getCategoryId()).get();
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(fieldValueDtos.getCategoryId()).get();
         CategoryMetadataFieldValues categoryFieldValues = new CategoryMetadataFieldValues();
         CategoryMetadataField categoryField;
 
         for(CategoryMetadataFieldDto fieldValuePair : fieldValueDtos.getFieldValues()){
 
-            categoryField = fieldRepository.findById(fieldValuePair.getId()).get();
+            categoryField = fieldRepository.findByIdAndIsDeletedFalse(fieldValuePair.getId()).get();
             String values = StringToSetParser.toCommaSeparatedString(fieldValuePair.getValues());
 
             categoryFieldValues.setValue(values);
@@ -353,18 +358,18 @@ public class CategoryService {
             return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
-        Category category = categoryRepository.findById(fieldValueDtos.getCategoryId()).get();
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(fieldValueDtos.getCategoryId()).get();
         Optional<CategoryMetadataFieldValues> savedMetadataFieldValue;
         CategoryMetadataFieldValues metadataFieldValue;
         List<CategoryMetadataFieldDto> fieldValuePairs = fieldValueDtos.getFieldValues();
 
         for(CategoryMetadataFieldDto fieldValuePair : fieldValuePairs){
-            CategoryMetadataField field = fieldRepository.findById(fieldValuePair.getId()).get();
+            CategoryMetadataField field = fieldRepository.findByIdAndIsDeletedFalse(fieldValuePair.getId()).get();
 
             CategoryMetadataFieldValuesId fieldValuePairId =
                     new CategoryMetadataFieldValuesId(category.getId(), field.getId());
 
-            savedMetadataFieldValue = valuesRepository.findById(fieldValuePairId);
+            savedMetadataFieldValue = valuesRepository.findByIdAndIsDeletedFalse(fieldValuePairId);
             String values = null;
             Set<String> valueSet;
             if(savedMetadataFieldValue.isPresent()){
@@ -396,7 +401,7 @@ public class CategoryService {
     public ResponseEntity<BaseVO> getFilteringDetailsForCategory(Long categoryId){
         BaseVO response;
 
-        Optional<Category> savedCategory = categoryRepository.findById(categoryId);
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(categoryId);
         if(!savedCategory.isPresent()){
             response = new ErrorVO("Not Found", "Category with id " + categoryId +" does not exist.", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
@@ -428,7 +433,7 @@ public class CategoryService {
     }
 
     public Set<String> getAllBrandsForCategory(Long categoryId) {
-        Optional<Category> savedCategory = categoryRepository.findById(categoryId);
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(categoryId);
         if(!savedCategory.isPresent())
             return null;
 
@@ -518,19 +523,32 @@ public class CategoryService {
         }
     }
 
+    public void deleteCategoryByCategoryId(Long c_id){
+        // it should be a leaf category only with no associated products.
 
-//    private void deleteCategory(Category category) {
-//        Category parentCategory = category.getParentCategory();
-//        parentCategory.getSubCategories().remove(category);
-//        category.setParentCategory(null);
-//        categoryRepository.save(parentCategory);
-//
-//        category.getFieldValues().forEach((fieldValue)->{
-//            fieldValue.setCategory(null);
-//            fieldValue.getCategoryMetadataField().set
-//            fieldValue.setCategoryMetadataField(null);
-//
-//        });
-//    }
+        // delete the category itself
+        categoryRepository.deleteCategoryById(c_id);
 
+        // delete all field values
+        valuesRepository.deleteValuesByCategoryId(c_id);
+    }
+
+    public String validateCategoryUpdate(Long id, String categoryName){
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(id);
+        String message;
+
+        if(!savedCategory.isPresent()){
+            message = "Category does not exist.";
+            return message;
+        }
+        Category category = savedCategory.get();
+        Category parent = category.getParentCategory();
+        Long parentId = null;
+        if(parent != null){
+            parentId = parent.getId();
+        }
+        return validateNewCategory(categoryName, parentId);
+
+
+    }
 }

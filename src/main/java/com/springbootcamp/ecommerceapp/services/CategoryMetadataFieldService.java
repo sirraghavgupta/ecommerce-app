@@ -53,7 +53,7 @@ public class CategoryMetadataFieldService {
     }
 
     public ResponseEntity<BaseVO> addNewMetadataField(String fieldName) {
-        CategoryMetadataField savedField = fieldRepository.findByName(fieldName);
+        CategoryMetadataField savedField = fieldRepository.findByNameAndIsDeletedFalse(fieldName);
         BaseVO response;
         if(savedField!=null){
             response = new ErrorVO("Invalid operation", "Field Name already exists", new Date());
@@ -86,7 +86,7 @@ public class CategoryMetadataFieldService {
     }
 
     public ResponseEntity<BaseVO> getAllMetadataFieldsByCategoryId(String offset, String size, String sortByField, String order, Long categoryId) {
-        Optional<Category> savedCategory = categoryRepository.findById(categoryId);
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(categoryId);
         BaseVO response;
 
         Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
@@ -115,4 +115,13 @@ public class CategoryMetadataFieldService {
         response = new ResponseVO<List>(fields, null, new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
+
+    public void deleteFieldById(Long id){
+        // delete the field itself first
+        fieldRepository.deleteFieldById(id);
+
+        // delete all the field-values first
+        valuesRepository.deleteValuesByFieldId(id);
+    }
+
 }

@@ -133,7 +133,7 @@ public class CustomerService {
     }
 
     public ResponseEntity<BaseVO> updateUserProfile(String email, CustomerViewProfileDto profileDto) {
-        Customer savedCustomer = customerRepository.findByEmail(email);
+        Customer savedCustomer = customerRepository.findByEmailAndIsDeletedFalse(email);
         if(profileDto.getFirstName() != null)
             savedCustomer.setFirstName(profileDto.getFirstName());
 

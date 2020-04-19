@@ -3,6 +3,7 @@ package com.springbootcamp.ecommerceapp.entities;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
+@Where(clause = "is_deleted='false'")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class User {
 

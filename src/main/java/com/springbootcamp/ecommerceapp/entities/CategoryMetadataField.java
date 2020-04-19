@@ -3,6 +3,7 @@ package com.springbootcamp.ecommerceapp.entities;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -18,12 +19,14 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
+@Where(clause = "is_deleted='false'")
 public class CategoryMetadataField extends AuditInformation{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
+    private Boolean isDeleted=false;
 
     @OneToMany(mappedBy = "categoryMetadataField", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<CategoryMetadataFieldValues> fieldValues;

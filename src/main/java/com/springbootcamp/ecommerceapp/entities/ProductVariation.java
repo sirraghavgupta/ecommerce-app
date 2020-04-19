@@ -4,6 +4,7 @@ import com.springbootcamp.ecommerceapp.utils.HashMapConverter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
+@Where(clause = "is_deleted='false'")
 public class ProductVariation  extends AuditInformation{
 
     @Id

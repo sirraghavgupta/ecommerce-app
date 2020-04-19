@@ -6,9 +6,12 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SellerRepository extends CrudRepository<Seller, Long> {
+
+    Optional<Seller> findById(Long id);
 
     Seller findByEmail(String email);
     Seller findByEmailAndIsDeletedFalse(String email);

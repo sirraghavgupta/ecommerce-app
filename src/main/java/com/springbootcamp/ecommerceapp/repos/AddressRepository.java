@@ -15,7 +15,7 @@ public interface AddressRepository extends CrudRepository<Address, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "update address set is_deleted=true, user_id=null where id= :Id", nativeQuery = true)
+    @Query(value = "update address set is_deleted=true where id= :Id", nativeQuery = true)
     void deleteAddressById(@Param("Id") Long Id);
 
     Optional<Address> findByIdAndIsDeletedFalse(Long id);

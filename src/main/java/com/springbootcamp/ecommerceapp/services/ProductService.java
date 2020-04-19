@@ -37,6 +37,9 @@ public class ProductService {
     CategoryService categoryService;
 
     @Autowired
+    ProductVariationService variationService;
+
+    @Autowired
     CategoryMetadataFieldRepository fieldRepository;
 
     @Autowired
@@ -79,7 +82,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Category> savedCategory = categoryRepository.findById(productDto.getCategoryId());
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(productDto.getCategoryId());
         if(!savedCategory.isPresent()){
             message = "Category does not exist.";
             return message;
@@ -90,7 +93,7 @@ public class ProductService {
             return message;
         }
 
-        Product savedProduct = productRepository.findByName(productDto.getName());
+        Product savedProduct = productRepository.findByNameAndIsDeletedFalse(productDto.getName());
         if(savedProduct!=null){
             if(savedProduct.getCategory().getId().equals(productDto.getCategoryId())){
                 if(savedProduct.getBrand().equalsIgnoreCase(productDto.getBrand())){
@@ -113,10 +116,10 @@ public class ProductService {
             return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
-        Category category = categoryRepository.findById(productDto.getCategoryId()).get();
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(productDto.getCategoryId()).get();
 
         Product product = toProduct(productDto);
-        Seller seller = sellerRepository.findByEmail(email);
+        Seller seller = sellerRepository.findByEmailAndIsDeletedFalse(email);
         product.setCategory(category);
         product.setSeller(seller);
         productRepository.save(product);
@@ -160,7 +163,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(variationDto.getProductId());
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(variationDto.getProductId());
         if(!savedProduct.isPresent()){
             message = "Parent product does not exist.";
             return message;
@@ -216,7 +219,7 @@ public class ProductService {
 
         for (String receivedField : receivedFieldsCopy) {
 
-            CategoryMetadataField field = fieldRepository.findByName(receivedField);
+            CategoryMetadataField field = fieldRepository.findByNameAndIsDeletedFalse(receivedField);
             List<Object> savedValues = valuesRepository.findAllValuesOfCategoryField(category.getId(), field.getId());
 
             String values = savedValues.get(0).toString();
@@ -237,7 +240,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             message = "Product with id - "+id+" not found.";
             response = new ErrorVO("Not Found", message, new Date());
@@ -277,7 +280,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             message = "Product with id - "+id+" not found.";
             response = new ErrorVO("Not Found", message, new Date());
@@ -305,7 +308,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             response = new ErrorVO("Validation failed", "Product with id "+id+ " not found", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
@@ -337,16 +340,16 @@ public class ProductService {
 
         List<Product> products;
         if(categoryId!=null && brand!=null){
-            products = productRepository.findByBrandAndCategoryId(brand, categoryId, pageable);
+            products = productRepository.findByBrandAndCategoryIdAndIsDeletedFalse(brand, categoryId, pageable);
         }
         else if(categoryId!=null){
-            products = productRepository.findByCategoryId(categoryId, pageable);
+            products = productRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
         }
         else if(brand != null){
-            products = productRepository.findByBrand(brand, pageable);
+            products = productRepository.findByBrandAndIsDeletedFalse(brand, pageable);
         }
         else{
-            products = productRepository.findAll(pageable);
+            products = productRepository.findByIsDeletedFalse(pageable);
         }
 
         List<ProductSellerDto> productDtos = new ArrayList<>();
@@ -364,7 +367,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<ProductVariation> savedVariation = variationRepository.findById(id);
+        Optional<ProductVariation> savedVariation = variationRepository.findByIdAndIsDeletedFalse(id);
         if(!savedVariation.isPresent()){
             response = new ErrorVO("Validation failed", "Product variation with id "+id+ " not found", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
@@ -394,7 +397,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             response = new ErrorVO("Validation failed", "Product with id "+id+ " not found", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
@@ -414,7 +417,7 @@ public class ProductService {
         Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
         List<ProductVariation> variations;
-        variations = variationRepository.findByProductId(id, pageable);
+        variations = variationRepository.findByProductIdAndIsDeletedFalse(id, pageable);
 
         List<ProductVariationSellerDto> variationDtos = new ArrayList<>();
         variations.forEach(variation -> {
@@ -433,7 +436,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             response = new ErrorVO("Validation failed", "Product with id "+id+ " not found", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
@@ -444,15 +447,8 @@ public class ProductService {
             response = new ErrorVO("Validation failed", message, new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
-        if(product.getIsDeleted()){
-            message = "Product does not exist.";
-            response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
-        }
 
-        reviewRepository.deleteByProductId(id);
-        variationRepository.deleteByProductId(id);
-        productRepository.deleteProductById(id);
+        deleteProductById(id);
 
         response = new ResponseVO<String>(null,"success", new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
@@ -462,7 +458,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             message = "Product with id "+id+ " not found";
             response = new ErrorVO("Validation failed", message, new Date());
@@ -481,7 +477,7 @@ public class ProductService {
         }
 
         if(productDto.getName() != null){
-            Product duplicateProduct = productRepository.findByName(productDto.getName());
+            Product duplicateProduct = productRepository.findByNameAndIsDeletedFalse(productDto.getName());
             if(duplicateProduct!=null){
                 if(duplicateProduct.getCategory().getId().equals(product.getCategory().getId())){
                     if(duplicateProduct.getBrand().equalsIgnoreCase(product.getBrand())){
@@ -506,7 +502,7 @@ public class ProductService {
             return validationResult;
         }
 
-        Product product = productRepository.findById(id).get();
+        Product product = productRepository.findByIdAndIsDeletedFalse(id).get();
         applyProductUpdateDtoToProduct(product, productDto);
         productRepository.save(product);
 
@@ -534,7 +530,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<ProductVariation> savedVariation = variationRepository.findById(id);
+        Optional<ProductVariation> savedVariation = variationRepository.findByIdAndIsDeletedFalse(id);
         if(!savedVariation.isPresent()){
             message = "Product variation with id "+id+ " not found";
             response = new ErrorVO("Validation failed", message, new Date());
@@ -593,7 +589,7 @@ public class ProductService {
 
             for (String receivedField : receivedFieldsCopy) {
 
-                CategoryMetadataField field = fieldRepository.findByName(receivedField);
+                CategoryMetadataField field = fieldRepository.findByNameAndIsDeletedFalse(receivedField);
                 List<Object> savedValues = valuesRepository.findAllValuesOfCategoryField(category.getId(), field.getId());
 
                 String values = savedValues.get(0).toString();
@@ -621,7 +617,7 @@ public class ProductService {
         if(validationResponse!=null)
             return validationResponse;
 
-        ProductVariation variation = variationRepository.findById(id).get();
+        ProductVariation variation = variationRepository.findByIdAndIsDeletedFalse(id).get();
 
         // now we can save the product variation.
         applyProductVariationUpdateDtoToProductVariation(variation, variationDto);
@@ -661,7 +657,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             message = "Product with id "+id+ " not found";
             response = new ErrorVO("Validation failed", message, new Date());
@@ -697,7 +693,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Category> savedCategory = categoryRepository.findById(categoryId);
+        Optional<Category> savedCategory = categoryRepository.findByIdAndIsDeletedFalse(categoryId);
         if(!savedCategory.isPresent()){
             message = "Category with id - " + categoryId + " does not exist.";
             response = new ErrorVO("Not found.", message, new Date());
@@ -737,10 +733,10 @@ public class ProductService {
     public Set<ProductCustomerViewDto> getAllProductCustomerViewDtosByCategory(Long categoryId, Pageable pageable){
         Set<ProductCustomerViewDto> productCustomerViewDtos = new LinkedHashSet<>();
 
-        Category category = categoryRepository.findById(categoryId).get();
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(categoryId).get();
 
         if(category.getSubCategories() == null || category.getSubCategories().isEmpty()){
-            List<Product> products = productRepository.findByCategoryId(categoryId, pageable);
+            List<Product> products = productRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
             for (Product product : products) {
                 productCustomerViewDtos.add(getProductCustomerViewDto(product));
             }
@@ -757,7 +753,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             message = "Product with id "+id+ " not found";
             response = new ErrorVO("Validation failed", message, new Date());
@@ -798,7 +794,7 @@ public class ProductService {
         BaseVO response;
         String message;
 
-        Optional<Product> savedProduct = productRepository.findById(id);
+        Optional<Product> savedProduct = productRepository.findByIdAndIsDeletedFalse(id);
         if(!savedProduct.isPresent()){
             message = "Product with id "+id+ " not found";
             response = new ErrorVO("Validation failed", message, new Date());
@@ -830,16 +826,16 @@ public class ProductService {
 
         List<Product> products;
         if(categoryId!=null && brand!=null){
-            products = productRepository.findByBrandAndCategoryId(brand, categoryId, pageable);
+            products = productRepository.findByBrandAndCategoryIdAndIsDeletedFalse(brand, categoryId, pageable);
         }
         else if(categoryId!=null){
-            products = productRepository.findByCategoryId(categoryId, pageable);
+            products = productRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
         }
         else if(brand != null){
-            products = productRepository.findByBrand(brand, pageable);
+            products = productRepository.findByBrandAndIsDeletedFalse(brand, pageable);
         }
         else{
-            products = productRepository.findAll(pageable);
+            products = productRepository.findByIsDeletedFalse(pageable);
         }
 
         List<ProductAdminViewDto> productDtos = new ArrayList<>();
@@ -856,8 +852,21 @@ public class ProductService {
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 
+    public void deleteProductById(Long p_id){
+        // delete the product
+        productRepository.deleteProductById(p_id);
+
+        // delete all variations
+        variationService.deleteVariationByProductId(p_id);
+
+        // delete all reviews
+        reviewRepository.deleteByProductId(p_id);
+    }
 
 
+    public void deleteAllProductsByCategoryId(Long c_id) {
+       productRepository.deleteProductsByCategoryId(c_id);
+    }
 
 }
 
