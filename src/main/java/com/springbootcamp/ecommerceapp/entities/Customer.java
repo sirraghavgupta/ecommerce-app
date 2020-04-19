@@ -13,7 +13,7 @@ import java.util.*;
 @Getter
 @Setter
 @Entity
-@Where(clause = "is_deleted='false'")
+@Where(clause = "is_deleted=false")
 public class Customer extends User{
 
     private String contact;

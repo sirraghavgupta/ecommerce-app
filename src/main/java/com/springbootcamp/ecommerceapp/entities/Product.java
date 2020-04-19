@@ -17,7 +17,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
-@Where(clause = "is_deleted='false'")
+@Where(clause = "is_deleted=false")
 public class Product  extends AuditInformation{
 
     @Id

@@ -12,7 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Where(clause = "is_deleted='false'")
+@Where(clause = "is_deleted=false")
 public class Category extends AuditInformation{
 
     @Id

@@ -14,7 +14,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
-@Where(clause = "is_deleted='false'")
+@Where(clause = "is_deleted=false")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class User {
 

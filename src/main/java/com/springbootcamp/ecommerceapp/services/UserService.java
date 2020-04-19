@@ -381,6 +381,7 @@ public class UserService {
         if(token==null){
             message = "User already activated";
             response = new ResponseVO<String>(null, message, new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
         }
 
         deleteVerificationToken(token.getToken());

@@ -30,7 +30,7 @@ public class AuthenticationEventListener {
             userService.registerUnsuccessfulLogin(user);
             userService.saveRegisteredUser(user);
         }catch(NullPointerException ex){
-            System.out.println("##### - exception caught = " + ex);
+            System.out.println(ex);
         }
     }
 
@@ -43,41 +43,28 @@ public class AuthenticationEventListener {
 
             LinkedHashMap<String,String> userMap = new LinkedHashMap<>();
             try {
-                System.out.println("getting details into the map");
                 userMap = (LinkedHashMap<String, String>) event.getAuthentication().getDetails();
-                System.out.println("got details into the map");
-                System.out.println(userMap);
             } catch (ClassCastException ex) {
-                System.out.println("===================== exception caught = " + ex);
+                System.out.println(ex);
             }
 
             String userEmail = new String();
 
             try {
-                System.out.println("====================== getting username =======================");
                 userEmail = userMap.get("username");
-                System.out.println(userEmail);
-                System.out.println("====================== got the username =======================");
             } catch (NullPointerException ex) {
-                System.out.println("============ exception caught = " + ex);
+                System.out.println(ex);
             }
 
         User user = userService.getUserByEmail(userEmail);
-        System.out.println(" ##### user found");
-        System.out.println(user);
         try{
-            System.out.println(user.getFirstName());
             userService.registerSuccessfulLogin(user);
-            System.out.println("value set");
             userService.saveRegisteredUser(user);
-            System.out.println("user saved successfully ");
         }
         catch(NullPointerException ex){
-            System.out.println("###### exception caught = " + ex);
+            System.out.println(ex);
         }
       }
-
     }
-
 }
 

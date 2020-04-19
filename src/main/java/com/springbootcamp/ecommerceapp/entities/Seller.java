@@ -13,7 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Where(clause = "is_deleted='false'")
+@Where(clause = "is_deleted=false")
 public class Seller extends User{
 
     private String GST;

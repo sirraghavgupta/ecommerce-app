@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Where(clause = "is_deleted='false'")
+@Where(clause = "is_deleted=false")
 public class CategoryMetadataFieldValues extends AuditInformation{
 
     @EmbeddedId

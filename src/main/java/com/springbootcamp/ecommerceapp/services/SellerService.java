@@ -64,7 +64,7 @@ public class SellerService {
     }
 
     public boolean isEmailUnique(String email){
-        Seller seller = sellerRepository.findByEmailAndIsDeletedFalse(email);
+        Seller seller = sellerRepository.findSellerByEmail(email);
         if(seller != null)
             return false;
 
@@ -72,14 +72,14 @@ public class SellerService {
     }
 
     public boolean isGSTUnique(String GST){
-        Seller seller = sellerRepository.findByGSTAndIsDeletedFalse(GST);
+        Seller seller = sellerRepository.findSellerByGST(GST);
         if(seller != null)
             return false;
 
         return true;
     }
     public boolean isCompanyNameUnique(String name){
-        Seller seller = sellerRepository.findByCompanyNameAndIsDeletedFalse(name);
+        Seller seller = sellerRepository.findSellerByCompanyName(name);
         if(seller != null)
             return false;
 
