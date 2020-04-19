@@ -10,12 +10,7 @@ import java.util.*;
 
 public class AppUser implements UserDetails {
 
-    private Long id;
-
     private String username;
-    private String firstName;
-    private String middleName;
-    private String lastName;
     private String password;
 
     private boolean isDeleted;
@@ -25,17 +20,11 @@ public class AppUser implements UserDetails {
 
     private Set<Role> roles;
 
-    private Set<Address> addresses;
-
     public AppUser() {
     }
 
     public AppUser(User user){
-        this.id = user.getId();
         this.username = user.getEmail();
-        this.firstName = user.getFirstName();
-        this.middleName = user.getMiddleName();
-        this.lastName = user.getLastName();
         this.password = user.getPassword();
         this.isActive = user.isActive();
         this.isDeleted = user.isDeleted();
@@ -43,8 +32,6 @@ public class AppUser implements UserDetails {
         this.isLocked = user.isLocked();
 
         this.roles = new HashSet<>(user.getRoles());
-
-        this.addresses = new HashSet<Address>(user.getAddresses());
     }
 
     @Override
