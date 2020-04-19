@@ -27,8 +27,8 @@ dependencies {
 //	for jackson and swagger
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0.rc1'
 	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.10.2'
-	compile 'io.springfox:springfox-swagger-ui:2.9.2'
-	compile 'io.springfox:springfox-swagger2:2.9.2'
+	compile 'io.springfox:springfox-swagger-ui:2.4.0'
+	compile 'io.springfox:springfox-swagger2:2.4.0'
 
 //	for patch request purpose.
 	compile group: 'com.github.java-json-tools', name: 'json-patch', version: '1.12'

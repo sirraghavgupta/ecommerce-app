@@ -29,11 +29,6 @@ public class LoginLogoutController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/")
-    public String index(){
-        return "index";
-    }
-
 
     @PostMapping("/doLogout")
     public ResponseEntity<BaseVO> logout(HttpServletRequest request){

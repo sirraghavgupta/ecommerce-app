@@ -10,7 +10,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableAsync
-@EnableSwagger2
 @EnableConfigurationProperties({ImageStorageProperties.class})
 public class SpringSecurityApplication {
 
