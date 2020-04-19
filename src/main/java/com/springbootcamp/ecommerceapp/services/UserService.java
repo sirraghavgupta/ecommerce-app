@@ -163,11 +163,11 @@ public class UserService {
         }
         else{
             User savedUser = user.get();
-            if(savedUser.isActive()){
+            if(savedUser.getIsActive()){
                 message = "User already active";
             }
             else{
-                savedUser.setActive(true);
+                savedUser.setIsActive(true);
                 userRepository.save(savedUser);
 //                Locale locale = request.getLocale();
                 String subject = "Account Activation";
@@ -197,11 +197,11 @@ public class UserService {
         }
         else{
             User savedUser = user.get();
-            if(!savedUser.isActive()){
+            if(!savedUser.getIsActive()){
                 message = "User already inactive";
             }
             else{
-                savedUser.setActive(false);
+                savedUser.setIsActive(false);
                 userRepository.save(savedUser);
 //                Locale locale = request.getLocale();
 
@@ -249,7 +249,7 @@ public class UserService {
         int count = user.getFailedAttempts();
         user.setFailedAttempts(count+1);
         if(user.getFailedAttempts() >= 3){
-            user.setLocked(true);
+            user.setIsLocked(true);
             sendAccountLockingMail(user.getEmail());
         }
     }
@@ -309,7 +309,7 @@ public class UserService {
         if(user==null)
             throw new UsernameNotFoundException("This email address does not exist.");
 
-        else if(!user.isActive() || user.isLocked()) {
+        else if(!user.getIsActive() || user.getIsLocked()) {
             message = "User is either de-activated or locked";
             error = "Operation not allowed";
             response = new ErrorVO(error, message, new Date());
@@ -424,13 +424,13 @@ public class UserService {
         }
 
         // if everything is alright
-        if(user.isActive()){
+        if(user.getIsActive()){
             message = "Your account is already active";
             response = new ResponseVO<String>(null, message, new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
         }
 
-        user.setActive(true);
+        user.setIsActive(true);
         saveRegisteredUser(user);
         deleteVerificationToken(token);
         message = "you have been activated successfully";
@@ -487,8 +487,8 @@ public class UserService {
     }
 
     public ResponseEntity<BaseVO> updateAddressById(String email, Long addressId, AddressDto addressDto) {
-        Optional<Address> address = addressRepository.findById(addressId);
-        User user = userRepository.findByEmail(email);
+        Optional<Address> address = addressRepository.findByIdAndIsDeletedFalse(addressId);
+        User user = userRepository.findByEmailAndIsDeletedFalse(email);
         BaseVO response;
 
         if(!address.isPresent()){

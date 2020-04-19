@@ -26,10 +26,10 @@ public class AppUser implements UserDetails {
     public AppUser(User user){
         this.username = user.getEmail();
         this.password = user.getPassword();
-        this.isActive = user.isActive();
-        this.isDeleted = user.isDeleted();
-        this.isExpired = user.isExpired();
-        this.isLocked = user.isLocked();
+        this.isActive = user.getIsActive();
+        this.isDeleted = user.getIsDeleted();
+        this.isExpired = user.getIsExpired();
+        this.isLocked = user.getIsLocked();
 
         this.roles = new HashSet<>(user.getRoles());
     }

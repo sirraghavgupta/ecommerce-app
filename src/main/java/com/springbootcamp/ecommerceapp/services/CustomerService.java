@@ -85,7 +85,7 @@ public class CustomerService {
     }
 
     public ResponseEntity<BaseVO> getUserProfile(String email) {
-        Customer customer = customerRepository.findByEmail(email);
+        Customer customer = customerRepository.findByEmailAndIsDeletedFalse(email);
         BaseVO response;
         CustomerViewProfileDto customerViewProfileDto = toCustomerViewProfileDto(customer);
         response = new ResponseVO<CustomerViewProfileDto>(customerViewProfileDto, null, new Date());
@@ -93,7 +93,7 @@ public class CustomerService {
     }
 
     public ResponseEntity<BaseVO> getCustomerAddresses(String email) {
-        Customer customer = customerRepository.findByEmail(email);
+        Customer customer = customerRepository.findByEmailAndIsDeletedFalse(email);
         BaseVO response;
         Set<AddressDto> addressDtos = new HashSet<>();
         Set<Address> addresses = customer.getAddresses();
@@ -107,7 +107,7 @@ public class CustomerService {
 
     public ResponseEntity<BaseVO> addNewAddress(String email, AddressDto addressDto) {
         BaseVO response;
-        Customer customer = customerRepository.findByEmail(email);
+        Customer customer = customerRepository.findByEmailAndIsDeletedFalse(email);
         Address newAddress = addressService.toAddress(addressDto);
         customer.addAddress(newAddress);
         customerRepository.save(customer);
@@ -117,7 +117,7 @@ public class CustomerService {
 
     public ResponseEntity<BaseVO> deleteAddress(String email, Long id) {
         BaseVO response;
-        Optional<Address> optAddress = addressRepository.findById(id);
+        Optional<Address> optAddress = addressRepository.findByIdAndIsDeletedFalse(id);
         if(!optAddress.isPresent()){
             response = new ErrorVO("Not found", "No address found with this id", new Date());
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -147,7 +147,7 @@ public class CustomerService {
             savedCustomer.setContact(profileDto.getContact());
 
         if(profileDto.getIsActive() != null && !profileDto.getIsActive())
-            savedCustomer.setActive(profileDto.getIsActive());
+            savedCustomer.setIsActive(profileDto.getIsActive());
 
         customerRepository.save(savedCustomer);
 

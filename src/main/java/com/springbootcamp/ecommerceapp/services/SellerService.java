@@ -146,7 +146,7 @@ public class SellerService {
             savedSeller.setImage(profileDto.getImage());
 
         if(profileDto.getIsActive() != null && !profileDto.getIsActive())
-            savedSeller.setActive(profileDto.getIsActive());
+            savedSeller.setIsActive(profileDto.getIsActive());
 
         if(profileDto.getGST() != null)
             savedSeller.setGST(profileDto.getGST());

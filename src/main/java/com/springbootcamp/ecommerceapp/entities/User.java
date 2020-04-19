@@ -29,10 +29,10 @@ public class User {
 
     private String password;
 
-    private boolean isDeleted = false;
-    private boolean isActive = false;
-    private boolean isExpired = false;
-    private boolean isLocked = false;
+    private Boolean isDeleted = false;
+    private Boolean isActive = false;
+    private Boolean isExpired = false;
+    private Boolean isLocked = false;
 
     private Integer failedAttempts = 0;
 

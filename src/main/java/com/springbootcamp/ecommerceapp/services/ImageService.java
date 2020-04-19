@@ -6,6 +6,7 @@ import com.springbootcamp.ecommerceapp.entities.User;
 import com.springbootcamp.ecommerceapp.exception.FileStorageException;
 import com.springbootcamp.ecommerceapp.exception.MyFileNotFoundException;
 import com.springbootcamp.ecommerceapp.repos.ProductVariationRepository;
+import com.springbootcamp.ecommerceapp.repos.UserRepository;
 import com.springbootcamp.ecommerceapp.utils.BaseVO;
 import com.springbootcamp.ecommerceapp.utils.ResponseVO;
 import io.swagger.models.auth.In;
@@ -37,6 +38,9 @@ public class ImageService {
     UserService userService;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     ProductVariationRepository variationRepository;
 
     @Autowired
@@ -65,7 +69,8 @@ public class ImageService {
         }
     }
 
-    public String storeUserProfileImage(MultipartFile file, String email) {
+    public BaseVO storeUserProfileImage(MultipartFile file, String email) {
+        BaseVO response;
 
         // get file name and extension
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -96,11 +101,22 @@ public class ImageService {
             Path targetLocation = this.imageStorageLocation.resolve(newFilename);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            return targetLocation.toString();
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/downloadImage/")
+                    .path(targetLocation.toString())
+                    .toUriString();
+
+            user.setImage(fileDownloadUri);
+            userRepository.save(user);
+
+            response = new ResponseVO<String>(fileDownloadUri, "Image uploaded successfully", new Date());
+
 
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
         }
+
+        return response;
     }
 
     public Resource loadImageAsResource(String fileName) {

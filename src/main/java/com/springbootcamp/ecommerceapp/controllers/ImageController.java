@@ -44,13 +44,7 @@ public class ImageController {
 
         String email = request.getUserPrincipal().getName();
 
-        String filePath = imageService.storeUserProfileImage(file, email);
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/downloadImage/")
-                .path(filePath)
-                .toUriString();
-        response = new ResponseVO<String>(fileDownloadUri, "Image uploaded successfully", new Date());
-        return response;
+        return imageService.storeUserProfileImage(file, email);
     }
 
     @ResponseStatus(HttpStatus.OK)
