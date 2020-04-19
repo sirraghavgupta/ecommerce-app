@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Cart {
+public class Cart extends AuditInformation{
 
     @EmbeddedId
     private CartId id = new CartId();

@@ -11,7 +11,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-public class Category {
+public class Category extends AuditInformation{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

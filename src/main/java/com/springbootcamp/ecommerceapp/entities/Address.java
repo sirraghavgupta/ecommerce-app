@@ -3,6 +3,7 @@ package com.springbootcamp.ecommerceapp.entities;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Address {
+public class Address extends AuditInformation{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

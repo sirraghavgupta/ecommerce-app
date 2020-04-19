@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-public class ProductReview {
+public class ProductReview  extends AuditInformation{
 
     @EmbeddedId
     private ProductReviewId productReviewId;

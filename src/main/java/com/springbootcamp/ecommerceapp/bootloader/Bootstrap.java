@@ -55,7 +55,7 @@ public class Bootstrap implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 /*
-        if(userRepository.count()<1){
+        if (userRepository.count() < 1) {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
@@ -89,7 +89,7 @@ public class Bootstrap implements ApplicationRunner {
             customer1.addAddress(new Address("B-100", "london", "haryana", "778884", "india", "home"));
             customer1.setActive(true);
 
-            Seller seller1 = new Seller("seller.seller@tothenew.com", "seller", "", "seller","bh7ht754r5", "amalgam pvt. lmt.", "9999988817");
+            Seller seller1 = new Seller("seller.seller@tothenew.com", "seller", "", "seller", "bh7ht754r5", "amalgam pvt. lmt.", "9999988817");
             seller1.setPassword(passwordEncoder.encode("pass"));
             seller1.addAddress(new Address("B-890", "rewari", "haryana", "778884", "india", "home"));
             seller1.setActive(true);
@@ -99,8 +99,7 @@ public class Bootstrap implements ApplicationRunner {
             userRepository.save(customer1);
             userRepository.save(seller1);
 
-            System.out.println("Total users saved::"+userRepository.count());
-
+            System.out.println("Total users saved::" + userRepository.count());
 
 
             Product product1 = new Product("UCB T-Shirt", "very attractive and comfortable", "UCB");
@@ -119,17 +118,17 @@ public class Bootstrap implements ApplicationRunner {
 
             categoryRepository.save(fashion);
 
-            System.out.println("total categories saved - "+ categoryRepository.count());
+            System.out.println("total categories saved - " + categoryRepository.count());
 
 
             ProductVariation mSize = new ProductVariation(5, 1500d);
-            Map<String, Object> attributes1= new HashMap<>();
+            Map<String, String> attributes1 = new HashMap<>();
             attributes1.put("size", "M-Size");
             attributes1.put("gender", "female");
             mSize.setProductAttributes(attributes1);
 
             ProductVariation lSize = new ProductVariation(3, 1600d);
-            Map<String, Object> attributes2= new HashMap<>();
+            Map<String, String> attributes2 = new HashMap<>();
             attributes2.put("size", "L-Size");
             attributes2.put("gender", "male");
             lSize.setProductAttributes(attributes2);
@@ -164,38 +163,38 @@ public class Bootstrap implements ApplicationRunner {
 
 //  ============================================================================
 
-        String sizeValues = "XS,S,M,L,XL,XXL";
-        CategoryMetadataFieldValues fieldValues = new CategoryMetadataFieldValues(sizeValues);
+            String sizeValues = "XS,S,M,L,XL,XXL";
+            CategoryMetadataFieldValues fieldValues = new CategoryMetadataFieldValues(sizeValues);
 //        String colorValues = "red, green, yellow";
 //        CategoryMetadataFieldValues fieldValues1 = new CategoryMetadataFieldValues(colorValues);
 //        String ramValues = "6gb, 8gb, 16gb";
 //        CategoryMetadataFieldValues fieldValues2 = new CategoryMetadataFieldValues(ramValues);
 
-        CategoryMetadataField sizeField = new CategoryMetadataField("size");
+            CategoryMetadataField sizeField = new CategoryMetadataField("size");
 //        CategoryMetadataField colorField = new CategoryMetadataField("color");
 //        CategoryMetadataField ramField = new CategoryMetadataField("ram");
 
             System.out.println(sizeField.getName() + "############################");
 
-        Category kids = new Category("kids");
+            Category kids = new Category("kids");
 
-        Category clothing1 = categoryRepository.findByName("clothing");
-        clothing1.addSubCategory(kids);
-        categoryRepository.save(clothing1);
+            Category clothing1 = categoryRepository.findByName("clothing");
+            clothing1.addSubCategory(kids);
+            categoryRepository.save(clothing1);
 
-        kids = categoryRepository.findByName("kids");
+            kids = categoryRepository.findByName("kids");
 //        kids.addFieldValues(fieldValues);
 //        kids.addFieldValues(fieldValues1);
 //        kids.addFieldValues(fieldValues2);
 //        sizeField.addFieldValues(fieldValues);
-        fieldRepository.save(sizeField);
+            fieldRepository.save(sizeField);
 
 //        colorField.addFieldValues(fieldValues1);
 //        ramField.addFieldValues(fieldValues2);
 
-        fieldValues.setCategoryMetadataField(sizeField);
-        fieldValues.setCategory(kids);
-        categoryMetadataFieldValuesRepository.save(fieldValues);
+            fieldValues.setCategoryMetadataField(sizeField);
+            fieldValues.setCategory(kids);
+            categoryMetadataFieldValuesRepository.save(fieldValues);
 
 //
 //        categoryMetadataFieldValuesRepository.save(fieldValues1);
@@ -242,10 +241,15 @@ public class Bootstrap implements ApplicationRunner {
             Category mobiles = new Category("mobiles");
             categoryRepository.save(mobiles);
 
- */
+
 //        }
 
+        }
+
+
+ */
         System.out.println("application went up !!==============================");
+
     }
 }
 

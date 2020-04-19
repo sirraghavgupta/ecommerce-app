@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-public class OrderStatus {
+public class OrderStatus extends AuditInformation{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

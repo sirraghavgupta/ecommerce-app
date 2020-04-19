@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +40,8 @@ public class AdminController {
 
 
     @GetMapping("/admin/home")
-    public ResponseEntity<BaseVO> getAdminHome(){
+    public ResponseEntity<BaseVO> getAdminHome()
+    {
         String message = "Admin home";
         BaseVO response = new ResponseVO<>(null, message, new Date());
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-public class CategoryMetadataFieldValues {
+public class CategoryMetadataFieldValues extends AuditInformation{
 
     @EmbeddedId
     private CategoryMetadataFieldValuesId id = new CategoryMetadataFieldValuesId();

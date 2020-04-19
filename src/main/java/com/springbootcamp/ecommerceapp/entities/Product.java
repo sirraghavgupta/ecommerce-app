@@ -16,7 +16,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Product {
+public class Product  extends AuditInformation{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

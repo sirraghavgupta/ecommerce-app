@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.WebRequest;
 
+import java.security.Principal;
 import java.util.*;
 
 @Service
@@ -63,24 +65,22 @@ public class UserService {
     PasswordEncoder passwordEncoder;
 
     @Autowired
-    EmailValidator emailValidator;
-
-    @Autowired
     AddressRepository addressRepository;
 
     @Autowired
     private TokenStore tokenStore;
 
-    public User getCurrentLoggedInUser()
+    public String getCurrentLoggedInUser()
     {
-        AppUser user=null;
-        User user1=null;
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        user = (AppUser) securityContext.getAuthentication().getPrincipal();
-
-        user1 = userRepository.findByEmail(user.getUsername());
-
-        return user1;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails)principal).getUsername();
+        }
+        else {
+            username = principal.toString();
+        }
+        return username;
     }
 
     public String createVerificationToken(User user){
