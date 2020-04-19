@@ -31,14 +31,6 @@ public class CustomerController {
     @Autowired
     CustomerService customerService;
 
-    @GetMapping("/customer/home")
-    public ResponseEntity<BaseVO> getCustomerHome(){
-
-        List<Product> products = productRepository.findAll();
-        ResponseVO<List> response = new ResponseVO<>(products, null, new Date());
-        return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
-    }
-
     @GetMapping("/customer/profile")
     public ResponseEntity<BaseVO> getProfileDetails(HttpServletRequest request){
         Principal principal = request.getUserPrincipal();

@@ -110,7 +110,7 @@ public class SellerService {
 
         Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
-        List<Seller> sellers = sellerRepository.findAll(pageable);
+        List<Seller> sellers = sellerRepository.findByIsDeletedFalse(pageable);
         List<SellerAdminApiDto> sellerAdminApiDtos = new ArrayList<>();
 
         sellers.forEach((seller)-> sellerAdminApiDtos.add(toSellerAdminApiDto(seller)));
@@ -118,7 +118,7 @@ public class SellerService {
     }
 
     public SellerAdminApiDto getSellerByEmail(String email) {
-        Seller seller = sellerRepository.findByEmail(email);
+        Seller seller = sellerRepository.findByEmailAndIsDeletedFalse(email);
         if(seller==null)
             return null;
         SellerAdminApiDto sellerAdminApiDto = toSellerAdminApiDto(seller);

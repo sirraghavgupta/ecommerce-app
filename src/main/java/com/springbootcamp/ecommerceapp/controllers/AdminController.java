@@ -107,13 +107,6 @@ public class AdminController {
         return responseEntity;
     }
 
-//    @GetMapping("/products")
-//    public ResponseEntity<VO>getAllProducts(){
-//        List<Product> list = productService.getAllProducts();
-//        VO response = new ResponseVO<>(list, null, new Date());
-//        return new ResponseEntity<>(response, HttpStatus.OK);
-//    }
-
 
     @PutMapping("/activate/{id}")
     public ResponseEntity<BaseVO> activateUser(@PathVariable Long id, WebRequest request){

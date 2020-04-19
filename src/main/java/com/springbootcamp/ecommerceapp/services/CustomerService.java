@@ -68,7 +68,7 @@ public class CustomerService {
 
         Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
-        List<Customer> customers = customerRepository.findAll(pageable);
+        List<Customer> customers = customerRepository.findByIsDeletedFalse(pageable);
 
         List<CustomerAdminApiDto> customerAdminApiDtos = new ArrayList<>();
 
@@ -77,7 +77,7 @@ public class CustomerService {
     }
 
     public CustomerAdminApiDto getCustomerByEmail(String email){
-        Customer customer = customerRepository.findByEmail(email);
+        Customer customer = customerRepository.findByEmailAndIsDeletedFalse(email);
         if(customer==null)
             return null;
         CustomerAdminApiDto customerAdminApiDto = toCustomerAdminApiDto(customer);

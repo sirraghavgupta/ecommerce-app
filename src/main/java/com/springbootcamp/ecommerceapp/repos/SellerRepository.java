@@ -11,12 +11,16 @@ import java.util.List;
 public interface SellerRepository extends CrudRepository<Seller, Long> {
 
     Seller findByEmail(String email);
+    Seller findByEmailAndIsDeletedFalse(String email);
 
     Seller findByCompanyName(String companyName);
+    Seller findByCompanyNameAndIsDeletedFalse(String companyName);
+
 
     Seller findByGST(String GST);
+    Seller findByGSTAndIsDeletedFalse(String GST);
 
-    List<Seller> findAll();
-    List<Seller> findAll(Pageable pageable);
+    List<Seller> findByIsDeletedFalse();
+    List<Seller> findByIsDeletedFalse(Pageable pageable);
 
 }
