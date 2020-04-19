@@ -18,10 +18,12 @@ public class SwaggerConfig {
 
 
     public static final Contact DEFAULT_CONTACT = new Contact(
-            "Raghav Gupta", "http://www.shipyard-demo.com", "raghav.gupta@tothenew.com");
+            "Raghav Gupta", "http://www.shipyard.com", "raghav.gupta@tothenew.com");
 
     public static final ApiInfo DEFAULT_API_INFO = new ApiInfo(
-            "API Title", "API Description", "1.0",
+            "SHIPYARD.com", "This application is a part of Bootcamp 2020, a training program" +
+            " at To The New Pvt. Lmt. It is an e-commerce application based on Spring boot with spring security, " +
+            "spring data JPA etc.", "1.0",
             "urn:tos", DEFAULT_CONTACT,
             "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0");
 
