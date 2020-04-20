@@ -37,6 +37,8 @@ public class SellerService {
 
     public Seller toSeller(SellerRegistrationDto sellerDto){
         Seller seller = modelMapper.map(sellerDto, Seller.class);
+        Address address = addressService.toAddress(sellerDto.getAddressDto());
+        seller.addAddress(address);
         return seller;
     }
 
@@ -58,7 +60,12 @@ public class SellerService {
 
     public SellerViewProfileDto toSellerViewProfileDto(Seller seller){
         SellerViewProfileDto sellerViewProfileDto = modelMapper.map(seller, SellerViewProfileDto.class);
-        AddressDto addressDto = addressService.toAddressDto(seller.getAddresses().stream().findFirst().get());
+        Set<Address> addresses = seller.getAddresses();
+        AddressDto addressDto;
+        if(addresses == null || addresses.isEmpty())
+            addressDto = null;
+        else
+            addressDto = addressService.toAddressDto(addresses.stream().findFirst().get());
         sellerViewProfileDto.setAddressDto(addressDto);
         return sellerViewProfileDto;
     }
@@ -135,6 +142,7 @@ public class SellerService {
 
     public ResponseEntity<BaseVO> updateUserProfile(String email, SellerViewProfileDto profileDto) {
         Seller savedSeller = sellerRepository.findByEmailAndIsDeletedFalse(email);
+        BaseVO response;
 
         if(profileDto.getFirstName() != null)
             savedSeller.setFirstName(profileDto.getFirstName());
@@ -148,18 +156,30 @@ public class SellerService {
         if(profileDto.getIsActive() != null && !profileDto.getIsActive())
             savedSeller.setIsActive(profileDto.getIsActive());
 
-        if(profileDto.getGST() != null)
-            savedSeller.setGST(profileDto.getGST());
+        if(profileDto.getGST() != null){
+            if(isGSTUnique(profileDto.getGST()))
+                savedSeller.setGST(profileDto.getGST());
+            else{
+                response = new ResponseVO<String>("Validation failed.", "GST number not unique.", new Date());
+                return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+            }
+        }
 
         if(profileDto.getCompanyContact() != null)
             savedSeller.setCompanyContact(profileDto.getCompanyContact());
 
-        if(profileDto.getCompanyName() != null)
-            savedSeller.setCompanyName(profileDto.getCompanyName());
+        if(profileDto.getCompanyName() != null){
+            if(isCompanyNameUnique(profileDto.getCompanyName()))
+                savedSeller.setCompanyName(profileDto.getCompanyName());
+            else{
+                response = new ResponseVO<String>("Validation failed.", "Company name not unique.", new Date());
+                return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+            }
+        }
 
         sellerRepository.save(savedSeller);
 
-        BaseVO response = new ResponseVO<String>("null", "Your profile has been updated", new Date());
+        response = new ResponseVO<String>("null", "Your profile has been updated", new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
     }
 }

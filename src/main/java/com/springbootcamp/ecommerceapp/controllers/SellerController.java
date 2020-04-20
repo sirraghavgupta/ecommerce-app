@@ -40,7 +40,7 @@ public class SellerController {
     }
 
     @PatchMapping("/seller/profile")
-    public ResponseEntity<BaseVO> updateProfileDetails(@RequestBody SellerViewProfileDto profileDto, HttpServletRequest request){
+    public ResponseEntity<BaseVO> updateProfileDetails(@Valid @RequestBody SellerViewProfileDto profileDto, HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String username = principal.getName();
         return sellerService.updateUserProfile(username, profileDto);

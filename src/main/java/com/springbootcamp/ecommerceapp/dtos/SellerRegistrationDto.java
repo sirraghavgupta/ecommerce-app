@@ -29,4 +29,7 @@ public class SellerRegistrationDto extends UserRegistrationDto {
     @Size(min = 10, max = 10)
     private String companyContact;
 
+    @NotNull
+    AddressDto addressDto;
+
 }
