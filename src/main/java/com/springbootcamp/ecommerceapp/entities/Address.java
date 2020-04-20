@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@Where(clause = "is_deleted=false")
 public class Address extends AuditInformation{
 
     @Id
