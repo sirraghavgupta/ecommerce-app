@@ -144,22 +144,28 @@ public class CategoryService {
         categoryAdminResponseDto.setCategory(categoryDto);
 
         // get child categories
-        Set<CategoryDto> subCategories;
-        if(category.getSubCategories() != null) {
+        Set<CategoryDto> subCategories;         // for response
+
+        List<Category> childCategories =        // actual
+                categoryRepository.findAllSubCategoriesByCategoryId(category.getId());
+        if(childCategories != null) {
             subCategories = new HashSet<>();
 
-            category.getSubCategories().forEach((e) -> {
-                subCategories.add(toCategoryDtoNonRecursive(e));
+            childCategories.forEach((e) -> {
+                subCategories.add(toCategoryDto(e));
             });
             categoryAdminResponseDto.setSubCategories(subCategories);
         }
 
-        // get the possible metadata fields and valucategoryDtoes
+        // get the possible metadata fields and values
         Set<CategoryMetadataFieldDto> fieldValues;
-        if(category.getFieldValues() != null) {
+        List<CategoryMetadataFieldValues> actualFieldValues =
+                valuesRepository.findAllFieldsAndValuesForLeafCategory(category.getId());
+
+        if(actualFieldValues != null) {
             fieldValues = new HashSet<>();
 
-            category.getFieldValues().forEach((e) -> {
+            actualFieldValues.forEach((e) -> {
                 CategoryMetadataFieldDto dto = fieldService.toCategoryMetadataFieldDto(e.getCategoryMetadataField());
                 dto.setValues(StringToSetParser.toSetOfValues(e.getValue()));
                 fieldValues.add(dto);
@@ -201,10 +207,13 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> getAllCategoriesForSeller() {
         BaseVO response;
-        List<Category> categories = categoryRepository.findByIsDeletedFalse();
+        List<Category> parentCategories = categoryRepository.findAllParentCategories();
+        List<Category> allCategories = categoryRepository.findByIsDeletedFalse();
+        allCategories.removeAll(parentCategories);
+
         List<CategoryAdminResponseDto> categoryDtos = new ArrayList<>();
 
-        categories.forEach((category)->{
+        allCategories.forEach((category)->{
             categoryDtos.add(toCategoryAdminResponseDto(category));
         });
 
@@ -250,7 +259,7 @@ public class CategoryService {
 
         List<Category> subCategories = categoryRepository.findAllSubCategoriesByCategoryId(id);
         if(subCategories!=null && !subCategories.isEmpty()){
-            response = new ErrorVO("Validation failed", "Category with " + id + " is a parent category.", new Date());
+            response = new ErrorVO("Validation failed", "Parent category can not be deleted.", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
         }
 
@@ -312,8 +321,21 @@ public class CategoryService {
             }
 
             if(purpose.equalsIgnoreCase("creation")){
-                if(!field.get().getFieldValues().isEmpty()){
+                List<CategoryMetadataFieldValues> fieldValues =
+                        valuesRepository.findByCategoryMetadataFieldIdAndIsDeletedFalse(field.get().getId());
+                if(fieldValues != null && !fieldValues.isEmpty()){
                     message = "Field values already exist for field "+fieldValuePair.getId();
+                }
+            }
+            else{
+                Optional<CategoryMetadataFieldValues> savedMetadataFieldValue;
+                CategoryMetadataFieldValuesId fieldValuePairId =
+                        new CategoryMetadataFieldValuesId(category.getId(), fieldValuePair.getId());
+
+                savedMetadataFieldValue = valuesRepository.findByIdAndIsDeletedFalse(fieldValuePairId);
+                if(!savedMetadataFieldValue.isPresent()){
+                    message = "Field with id - " + fieldValuePair.getId() + " does not belong to this category.";
+                    return message;
                 }
             }
 
@@ -332,11 +354,11 @@ public class CategoryService {
     public ResponseEntity<BaseVO> createMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
         BaseVO response;
         Category category = categoryRepository.findByIdAndIsDeletedFalse(fieldValueDtos.getCategoryId()).get();
-        CategoryMetadataFieldValues categoryFieldValues = new CategoryMetadataFieldValues();
+        CategoryMetadataFieldValues categoryFieldValues;
         CategoryMetadataField categoryField;
 
         for(CategoryMetadataFieldDto fieldValuePair : fieldValueDtos.getFieldValues()){
-
+            categoryFieldValues = new CategoryMetadataFieldValues();
             categoryField = fieldRepository.findByIdAndIsDeletedFalse(fieldValuePair.getId()).get();
             String values = StringToSetParser.toCommaSeparatedString(fieldValuePair.getValues());
 
@@ -352,7 +374,7 @@ public class CategoryService {
 
     public ResponseEntity<BaseVO> updateMetadataFieldValuePair(MetadataFieldValueInsertDto fieldValueDtos) {
         BaseVO response;
-        String message = validateCategoryMetadataFieldDto(fieldValueDtos, "creation");
+        String message = validateCategoryMetadataFieldDto(fieldValueDtos, "updation");
         if(!message.equalsIgnoreCase("success")){
             response = new ErrorVO("Validation failed", message, new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
@@ -372,15 +394,10 @@ public class CategoryService {
             savedMetadataFieldValue = valuesRepository.findByIdAndIsDeletedFalse(fieldValuePairId);
             String values = null;
             Set<String> valueSet;
-            if(savedMetadataFieldValue.isPresent()){
-                metadataFieldValue = savedMetadataFieldValue.get();
-                values = metadataFieldValue.getValue();
-                valueSet = StringToSetParser.toSetOfValues(values);
-            }
-            else{
-                metadataFieldValue = new CategoryMetadataFieldValues();
-                valueSet = new HashSet<>();
-            }
+
+            metadataFieldValue = savedMetadataFieldValue.get();
+            values = metadataFieldValue.getValue();
+            valueSet = StringToSetParser.toSetOfValues(values);
 
             for(String value : fieldValuePair.getValues()){
                 valueSet.add(value);
@@ -505,19 +522,20 @@ public class CategoryService {
         }
 
         else{
-            List<Object[]> fieldValuePairs =
+            List<CategoryMetadataFieldValues> fieldValuePairs =
                     valuesRepository.findAllFieldsAndValuesForLeafCategory(category.getId());
 
             Set<String> fields = fieldValueMap.keySet();
 
-            for(Object[] pair : fieldValuePairs){
-                if(fields.contains(pair[0].toString())){
-                    String values = fieldValueMap.get(pair[0].toString());
-                    values = values + "," +pair[1];
-                    fieldValueMap.put(pair[0].toString(), values);
+            for(CategoryMetadataFieldValues pair : fieldValuePairs){
+                String fieldName = pair.getCategoryMetadataField().getName();
+                if(fields.contains(fieldName)){
+                    String values = fieldValueMap.get(fieldName);
+                    values = values + "," +pair.getValue();
+                    fieldValueMap.put(fieldName, values);
                 }
                 else{
-                    fieldValueMap.put(pair[0].toString(), pair[1].toString());
+                    fieldValueMap.put(fieldName, pair.getValue());
                 }
             }
         }
@@ -547,8 +565,21 @@ public class CategoryService {
         if(parent != null){
             parentId = parent.getId();
         }
-        return validateNewCategory(categoryName, parentId);
+        message =  validateNewCategory(categoryName, parentId);
+        if(!message.equalsIgnoreCase("valid")){
+            return message;
+        }
 
+        List<Category> subCategories = categoryRepository.findAllSubCategoriesByCategoryId(id);
+        if(subCategories!=null && !subCategories.isEmpty()){
+            for (Category subCategory : subCategories) {
+                if(subCategory.getName().equalsIgnoreCase(categoryName)){
+                    message = "Child category with this name already exists.";
+                    return message;
+                }
+            }
 
+        }
+        return "valid";
     }
 }

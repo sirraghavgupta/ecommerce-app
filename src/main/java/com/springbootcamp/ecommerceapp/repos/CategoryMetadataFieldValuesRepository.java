@@ -26,20 +26,23 @@ public interface CategoryMetadataFieldValuesRepository extends CrudRepository<Ca
     List<Object[]> findAllFieldsOfCategoryById(@Param("c_id") Long c_id);
 
 
+    List<CategoryMetadataFieldValues> findByCategoryMetadataFieldIdAndIsDeletedFalse(@Param("f_id") Long f_id);
+
+
     @Query(value = "select v.value from category_metadata_field_values v" +
             " where v.category_metadata_field_id = :f_id and " +
             "v.category_id = :c_id and v.is_deleted=false", nativeQuery = true)
     List<Object> findAllValuesOfCategoryField(@Param("c_id") Long c_id, @Param("f_id") Long f_id);
 
 
-    @Query(value = "select f.name, v.value from " +
+    @Query(value = "select * from " +
             "category_metadata_field f " +
             "inner join " +
             "category_metadata_field_values v " +
-            "on f.id = category_metadata_field_id " +
+            "on f.id = v.category_metadata_field_id " +
             "where v.category_id = :c_id and v.is_deleted=false and " +
-            "f.isDeleted=false", nativeQuery = true)
-    List<Object[]> findAllFieldsAndValuesForLeafCategory(@Param("c_id") Long c_id);
+            "f.is_deleted=false", nativeQuery = true)
+    List<CategoryMetadataFieldValues> findAllFieldsAndValuesForLeafCategory(@Param("c_id") Long c_id);
 
 
 

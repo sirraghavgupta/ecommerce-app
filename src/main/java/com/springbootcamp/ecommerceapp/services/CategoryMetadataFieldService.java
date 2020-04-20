@@ -53,8 +53,13 @@ public class CategoryMetadataFieldService {
     }
 
     public ResponseEntity<BaseVO> addNewMetadataField(String fieldName) {
-        CategoryMetadataField savedField = fieldRepository.findByNameAndIsDeletedFalse(fieldName);
         BaseVO response;
+        if(fieldName == null || fieldName.isEmpty()){
+            response = new ErrorVO("Validation failed.", "Field Name can not be empty.", new Date());
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        CategoryMetadataField savedField = fieldRepository.findByNameAndIsDeletedFalse(fieldName);
         if(savedField!=null){
             response = new ErrorVO("Invalid operation", "Field Name already exists", new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.CONFLICT);

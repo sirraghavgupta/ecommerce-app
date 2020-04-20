@@ -51,8 +51,10 @@ public interface CategoryRepository extends CrudRepository<Category, Long> {
     List<Category> findAllSubCategoriesOfCategory(@Param("c_id") Long c_id);
 
 
-//    @Query(value = "select * from category where id not in(select distinct c.parent_id from category c where c.is_deleted=false))", nativeQuery = true)
-//    List<Category> findAllLeafCategories();
+    @Query(value = "select * from category where id in (select distinct parent_id from category c where is_deleted=false) and is_deleted=false", nativeQuery = true)
+    List<Category> findAllParentCategories();
+
+
 }
 
 
