@@ -22,8 +22,8 @@ public interface CategoryMetadataFieldValuesRepository extends CrudRepository<Ca
     @Query(value = "select f.name from category_metadata_field f inner join " +
             "category_metadata_field_values v on " +
             "f.id=v.category_metadata_field_id " +
-            "where v.category_id = :c_id and v.is_deleted=false and f.isDeleted=false", nativeQuery = true)
-    List<Object[]> findAllFieldsOfCategoryById(@Param("c_id") Long c_id);
+            "where v.category_id = :c_id and v.is_deleted=false and f.is_deleted=false", nativeQuery = true)
+    List<Object> findAllFieldsOfCategoryById(@Param("c_id") Long c_id);
 
 
     List<CategoryMetadataFieldValues> findByCategoryMetadataFieldIdAndIsDeletedFalse(@Param("f_id") Long f_id);

@@ -20,10 +20,12 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
     Optional<Product> findByIdAndIsDeletedFalse(Long id);
 
     List<Product> findAll();
-    List<Product> findByIsDeletedFalse();
-
     List<Product> findAll(Pageable pageable);
+
+    List<Product> findByIsDeletedFalse();
     List<Product> findByIsDeletedFalse(Pageable pageable);
+    List<Product> findBySellerIdAndIsDeletedFalse(Long s_id, Pageable pageable);
+
 
 
     Product findByName(String name);
@@ -31,11 +33,19 @@ public interface ProductRepository extends CrudRepository<Product, Long> {
 
     List<Product> findByBrandAndCategoryIdAndIsDeletedFalse(String brand, Long id);
     List<Product> findByBrandAndIsDeletedFalse(String brand);
-    List<Product> findByCategoryIdAndIsDeletedFalse(Long c_id);
 
-    List<Product> findByBrandAndCategoryIdAndIsDeletedFalse(String brand, Long id, Pageable pageable);
+    List<Product> findByCategoryIdAndIsDeletedFalse(Long c_id);
+    List<Product> findBySellerIdAndCategoryIdAndIsDeletedFalse(Long s_id, Long c_id);
+
+    List<Product> findByBrandAndCategoryIdAndIsDeletedFalse(String brand, Long c_id, Pageable pageable);
+    List<Product> findBySellerIdAndBrandAndCategoryIdAndIsDeletedFalse(Long s_id, String brand, Long c_id, Pageable pageable);
+
     List<Product> findByBrandAndIsDeletedFalse(String brand, Pageable pageable);
-    List<Product> findByCategoryIdAndIsDeletedFalse(Long id, Pageable pageable);
+    List<Product> findBySellerIdAndBrandAndIsDeletedFalse(Long s_id, String brand, Pageable pageable);
+
+    List<Product> findByCategoryIdAndIsDeletedFalse(Long c_id, Pageable pageable);
+    List<Product> findBySellerIdAndCategoryIdAndIsDeletedFalse(Long s_id, Long c_id, Pageable pageable);
+
 
 
     @Query(value = "select brand from product where category_id = :c_id and is_deleted=false", nativeQuery = true)

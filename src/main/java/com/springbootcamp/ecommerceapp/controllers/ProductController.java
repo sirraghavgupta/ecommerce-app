@@ -57,8 +57,11 @@ public class ProductController {
                                         @RequestParam(defaultValue = "id") String sortByField,
                                         @RequestParam(defaultValue = "ascending") String order,
                                         @RequestParam(required = false) Long categoryId,
-                                        @RequestParam(required = false) String brand){
-        return productService.getAllProductsForSeller(offset, size, sortByField, order, categoryId, brand);
+                                        @RequestParam(required = false) String brand,
+                                        HttpServletRequest request){
+        Principal principal = request.getUserPrincipal();
+        String email = principal.getName();
+        return productService.getAllProductsForSeller(offset, size, sortByField, order, categoryId, brand, email);
     }
 
     @PostMapping("/seller/product-variations")
@@ -87,7 +90,6 @@ public class ProductController {
                                                                               HttpServletRequest request){
         Principal principal = request.getUserPrincipal();
         String email = principal.getName();
-        System.out.println("called up #############============###########");
         return productService.getAllProductVariationsByProductIdForSeller(email, productId, offset, size, sortByField, order);
     }
 
