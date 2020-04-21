@@ -1,0 +1,26 @@
+1. Login Logout Apis
+https://www.getpostman.com/collections/8a637c68766ac869d929
+
+2. Forgot Password Apis
+https://www.getpostman.com/collections/ff38b04da953797a7f37
+
+3. Registration Apis
+https://www.getpostman.com/collections/0452b223800b86ca85ca
+
+4. Admin Apis
+https://www.getpostman.com/collections/e3a2de4e51c58389455e
+
+5. Customer Apis
+https://www.getpostman.com/collections/5841a63d92a51729d6e3
+
+6. Seller Apis
+https://www.getpostman.com/collections/3475d148b758731b4734
+
+7. Category Apis
+https://www.getpostman.com/collections/b3ac94427a4aea4f756d
+
+8. Product Apis
+https://www.getpostman.com/collections/faa35eab045c047c948e
+
+9. Image Apis - [contains the customer and seller upload profile image API only]
+https://www.getpostman.com/collections/d09c6de8efb17dfcc06e
