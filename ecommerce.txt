@@ -1,0 +1,663 @@
+-- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+--
+-- Host: localhost    Database: ecommerce
+-- ------------------------------------------------------
+-- Server version	5.7.29-0ubuntu0.18.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `address`
+--
+
+DROP TABLE IF EXISTS `address`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `address` (
+  `id` bigint(20) NOT NULL,
+  `address_line` varchar(255) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  `label` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `zip_code` varchar(255) DEFAULT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `address`
+--
+
+LOCK TABLES `address` WRITE;
+/*!40000 ALTER TABLE `address` DISABLE KEYS */;
+INSERT INTO `address` VALUES (45,'B980','noida','india',_binary '\0','home','haryana','776664',4,'customer@customer.com','2020-04-19','customer@customer.com','2020-04-19'),(71,'B980','vegas','india',_binary '','home','haryana','776664',4,'customer@customer.com','2020-04-20','customer@customer.com','2020-04-20'),(108,'70','faridabad','india',_binary '\0','home','haryana','121004',7,'seller.seller@tothenew.com','2020-04-20','seller.seller@tothenew.com','2020-04-20'),(109,'780','faridabad','india',_binary '\0','work','haryana','121001',4,'customer@customer.com','2020-04-20','customer@customer.com','2020-04-20'),(113,'990','pathankot','india',_binary '\0','home','haryana','121004',112,'anonymousUser','2020-04-20','seller.jewel@gmail.com','2020-04-20');
+/*!40000 ALTER TABLE `address` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `admin`
+--
+
+DROP TABLE IF EXISTS `admin`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `admin` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `failed_attempts` int(11) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `is_active` bit(1) NOT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  `is_expired` bit(1) NOT NULL,
+  `is_locked` bit(1) NOT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `middle_name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_c0r9atamxvbhjjvy5j8da1kam` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `admin`
+--
+
+LOCK TABLES `admin` WRITE;
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+INSERT INTO `admin` VALUES (1,'draghavgupta.96@gmail.com',0,'admin',NULL,_binary '',_binary '\0',_binary '\0',_binary '\0','admin','','$2a$10$2oZUpmgOswtuRnKsgQtpieM3UZP9w.eRrotWTPELnriCSy4a7Js8i');
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `cart`
+--
+
+DROP TABLE IF EXISTS `cart`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cart` (
+  `is_wishlisted` bit(1) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `owner_id` bigint(20) NOT NULL,
+  `item_id` bigint(20) NOT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  PRIMARY KEY (`owner_id`,`item_id`),
+  UNIQUE KEY `UK_qos1ose3g80t5h0r19xkvypdc` (`owner_id`),
+  KEY `FKmnckdy8vkoek912efwrm8ueqk` (`item_id`),
+  CONSTRAINT `FKmnckdy8vkoek912efwrm8ueqk` FOREIGN KEY (`item_id`) REFERENCES `product_variation` (`id`),
+  CONSTRAINT `FKq1vsr5dh6oyxuki0al2dmk8kp` FOREIGN KEY (`owner_id`) REFERENCES `customer` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cart`
+--
+
+LOCK TABLES `cart` WRITE;
+/*!40000 ALTER TABLE `cart` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cart` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `category`
+--
+
+DROP TABLE IF EXISTS `category`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `category` (
+  `id` bigint(20) NOT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `parent_id` bigint(20) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK2y94svpmqttx80mshyny85wqr` (`parent_id`),
+  CONSTRAINT `FK2y94svpmqttx80mshyny85wqr` FOREIGN KEY (`parent_id`) REFERENCES `category` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `category`
+--
+
+LOCK TABLES `category` WRITE;
+/*!40000 ALTER TABLE `category` DISABLE KEYS */;
+INSERT INTO `category` VALUES (9,_binary '\0','fashion',NULL,NULL,NULL,NULL,NULL),(10,_binary '\0','clothing',9,NULL,NULL,NULL,NULL),(11,_binary '\0','men',10,NULL,NULL,NULL,NULL),(12,_binary '\0','women',10,NULL,NULL,NULL,NULL),(16,_binary '\0','pants',10,NULL,NULL,'draghavgupta.96@gmail.com','2020-04-20'),(86,_binary '\0','shirts',16,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(87,_binary '','pants',16,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(88,_binary '','fancy dresses',16,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(89,_binary '\0','footwear',16,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(90,_binary '\0','electronics',NULL,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(91,_binary '\0','TV',90,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(92,_binary '\0','Air Purifiers',90,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(93,_binary '\0','Air Conditioners',90,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20'),(116,_binary '','inner wear',16,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20');
+/*!40000 ALTER TABLE `category` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `category_metadata_field`
+--
+
+DROP TABLE IF EXISTS `category_metadata_field`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `category_metadata_field` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` datetime(6) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `is_deleted` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `category_metadata_field`
+--
+
+LOCK TABLES `category_metadata_field` WRITE;
+/*!40000 ALTER TABLE `category_metadata_field` DISABLE KEYS */;
+INSERT INTO `category_metadata_field` VALUES (17,'size',NULL,NULL,NULL,NULL,_binary '\0'),(81,'length','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0'),(82,'width','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0'),(83,'color','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0'),(84,'waist','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0'),(85,'collar','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0'),(117,'sole type','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0'),(119,'sole height','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0'),(120,'screen size','draghavgupta.96@gmail.com','draghavgupta.96@gmail.com','2020-04-20 00:00:00.000000','2020-04-20',_binary '\0');
+/*!40000 ALTER TABLE `category_metadata_field` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `category_metadata_field_values`
+--
+
+DROP TABLE IF EXISTS `category_metadata_field_values`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `category_metadata_field_values` (
+  `value` varchar(255) DEFAULT NULL,
+  `category_id` bigint(20) NOT NULL,
+  `category_metadata_field_id` bigint(20) NOT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  `is_deleted` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`category_id`,`category_metadata_field_id`),
+  KEY `FKfsweeyj17menin7m4w6hvfixy` (`category_metadata_field_id`),
+  CONSTRAINT `FKfsweeyj17menin7m4w6hvfixy` FOREIGN KEY (`category_metadata_field_id`) REFERENCES `category_metadata_field` (`id`),
+  CONSTRAINT `FKthr49jet6ltstle56es0o7jmx` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `category_metadata_field_values`
+--
+
+LOCK TABLES `category_metadata_field_values` WRITE;
+/*!40000 ALTER TABLE `category_metadata_field_values` DISABLE KEYS */;
+INSERT INTO `category_metadata_field_values` VALUES ('12,14,16,20,10',86,17,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary '\0'),('red,green,blue,white,yellow',86,83,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary '\0'),('chinese,japanese,indian',86,85,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary '\0'),('green,blue,white,black,brown',87,83,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary ''),('22,24,16,18,20',87,84,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary ''),('1,2,3,4,5,6,7,8,9',89,17,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary '\0'),('red,gray,black,yellow,charm white,maroon,cyan,sea green',89,83,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary '\0'),('gray,black',91,83,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary '\0'),('52,42,64,21,32',91,120,'draghavgupta.96@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20',_binary '\0');
+/*!40000 ALTER TABLE `category_metadata_field_values` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `customer`
+--
+
+DROP TABLE IF EXISTS `customer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `customer` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `failed_attempts` int(11) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `is_active` bit(1) NOT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  `is_expired` bit(1) NOT NULL,
+  `is_locked` bit(1) NOT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `middle_name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `contact` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_dwk6cx0afu8bs9o4t536v1j5v` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `customer`
+--
+
+LOCK TABLES `customer` WRITE;
+/*!40000 ALTER TABLE `customer` DISABLE KEYS */;
+INSERT INTO `customer` VALUES (4,'customer@customer.com',0,'Raghav','http://localhost:8080/downloadImage/home/raghav/eCommerceApp/static/images/users/4.jpg',_binary '',_binary '\0',_binary '\0',_binary '\0','gupta','','$2a$10$mq3ZxetQrhMzsBJKwAHjrOG9fGi9MxgqJtwWMlM0e27VH5GsVFU1C','9873556644'),(106,'raghav.gupta@tothenew.com',0,'raghav',NULL,_binary '\0',_binary '\0',_binary '\0',_binary '\0','gupta','','$2a$10$rq/sgH6QeFMXxl.yJGfV5u/XKLlbEB9AaZSijRIBY/yzr50dOnHSy','9989980655');
+/*!40000 ALTER TABLE `customer` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `forgot_password_token`
+--
+
+DROP TABLE IF EXISTS `forgot_password_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `forgot_password_token` (
+  `id` bigint(20) NOT NULL,
+  `expiry_date` datetime(6) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `forgot_password_token`
+--
+
+LOCK TABLES `forgot_password_token` WRITE;
+/*!40000 ALTER TABLE `forgot_password_token` DISABLE KEYS */;
+/*!40000 ALTER TABLE `forgot_password_token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hibernate_sequence`
+--
+
+DROP TABLE IF EXISTS `hibernate_sequence`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hibernate_sequence` (
+  `next_val` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hibernate_sequence`
+--
+
+LOCK TABLES `hibernate_sequence` WRITE;
+/*!40000 ALTER TABLE `hibernate_sequence` DISABLE KEYS */;
+INSERT INTO `hibernate_sequence` VALUES (125),(125),(125),(125),(125),(125),(125),(125),(125),(125),(125);
+/*!40000 ALTER TABLE `hibernate_sequence` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `order_product`
+--
+
+DROP TABLE IF EXISTS `order_product`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `order_product` (
+  `id` bigint(20) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `price` double DEFAULT NULL,
+  `product_attributes` varchar(255) DEFAULT NULL,
+  `order_id` bigint(20) DEFAULT NULL,
+  `product_variation_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKl5mnj9n0di7k1v90yxnthkc73` (`order_id`),
+  KEY `FKi3eootolfdgf03udd7n6g2vqe` (`product_variation_id`),
+  CONSTRAINT `FKi3eootolfdgf03udd7n6g2vqe` FOREIGN KEY (`product_variation_id`) REFERENCES `product_variation` (`id`),
+  CONSTRAINT `FKl5mnj9n0di7k1v90yxnthkc73` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `order_product`
+--
+
+LOCK TABLES `order_product` WRITE;
+/*!40000 ALTER TABLE `order_product` DISABLE KEYS */;
+/*!40000 ALTER TABLE `order_product` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `order_status`
+--
+
+DROP TABLE IF EXISTS `order_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `order_status` (
+  `id` bigint(20) NOT NULL,
+  `from_status` varchar(255) DEFAULT NULL,
+  `to_status` varchar(255) DEFAULT NULL,
+  `transition_notes` varchar(255) DEFAULT NULL,
+  `order_product_id` bigint(20) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKgh294heu98safvepyc2807mf4` (`order_product_id`),
+  CONSTRAINT `FKgh294heu98safvepyc2807mf4` FOREIGN KEY (`order_product_id`) REFERENCES `order_product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `order_status`
+--
+
+LOCK TABLES `order_status` WRITE;
+/*!40000 ALTER TABLE `order_status` DISABLE KEYS */;
+/*!40000 ALTER TABLE `order_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `orders`
+--
+
+DROP TABLE IF EXISTS `orders`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `orders` (
+  `id` bigint(20) NOT NULL,
+  `amount_paid` double DEFAULT NULL,
+  `date_created` date DEFAULT NULL,
+  `address_line` varchar(255) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `label` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `zip_code` varchar(255) DEFAULT NULL,
+  `payment_method` varchar(255) DEFAULT NULL,
+  `customer_user_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKb5g5scr9yb0xwbc16mw3wp0is` (`customer_user_id`),
+  CONSTRAINT `FKb5g5scr9yb0xwbc16mw3wp0is` FOREIGN KEY (`customer_user_id`) REFERENCES `customer` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `orders`
+--
+
+LOCK TABLES `orders` WRITE;
+/*!40000 ALTER TABLE `orders` DISABLE KEYS */;
+/*!40000 ALTER TABLE `orders` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `product`
+--
+
+DROP TABLE IF EXISTS `product`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `product` (
+  `id` bigint(20) NOT NULL,
+  `brand` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `is_active` bit(1) DEFAULT NULL,
+  `is_cancelleable` bit(1) DEFAULT NULL,
+  `is_deleted` bit(1) DEFAULT NULL,
+  `is_returnable` bit(1) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `category_id` bigint(20) DEFAULT NULL,
+  `seller_user_id` bigint(20) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK1mtsbur82frn64de7balymq9s` (`category_id`),
+  KEY `FKlmg4m307mfjvo5b73qdly45l8` (`seller_user_id`),
+  CONSTRAINT `FK1mtsbur82frn64de7balymq9s` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`),
+  CONSTRAINT `FKlmg4m307mfjvo5b73qdly45l8` FOREIGN KEY (`seller_user_id`) REFERENCES `seller` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `product`
+--
+
+LOCK TABLES `product` WRITE;
+/*!40000 ALTER TABLE `product` DISABLE KEYS */;
+INSERT INTO `product` VALUES (13,'UCB','very attractive and comfortable',_binary '\0',_binary '\0',_binary '',_binary '\0','UCB T-Shirt',11,7,NULL,NULL,NULL,NULL),(95,'crocs','dashing and very comfortable for summers',_binary '',_binary '',_binary '\0',_binary '','kids crocs',89,7,'seller.seller@tothenew.com','2020-04-20','seller.seller@tothenew.com','2020-04-21'),(121,'SAMSUNG','best for your family time and kids',_binary '',_binary '',_binary '\0',_binary '\0','Samsumgg ultra hd smart TV',91,112,'seller.jewel@gmail.com','2020-04-20','draghavgupta.96@gmail.com','2020-04-20');
+/*!40000 ALTER TABLE `product` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `product_review`
+--
+
+DROP TABLE IF EXISTS `product_review`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `product_review` (
+  `is_deleted` bit(1) NOT NULL,
+  `rating` double DEFAULT NULL,
+  `review` varchar(255) DEFAULT NULL,
+  `author_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  PRIMARY KEY (`author_id`,`product_id`),
+  KEY `FKkaqmhakwt05p3n0px81b9pdya` (`product_id`),
+  CONSTRAINT `FKbs7494qmkah0h2mad6io0eto3` FOREIGN KEY (`author_id`) REFERENCES `customer` (`id`),
+  CONSTRAINT `FKkaqmhakwt05p3n0px81b9pdya` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `product_review`
+--
+
+LOCK TABLES `product_review` WRITE;
+/*!40000 ALTER TABLE `product_review` DISABLE KEYS */;
+/*!40000 ALTER TABLE `product_review` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `product_variation`
+--
+
+DROP TABLE IF EXISTS `product_variation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `product_variation` (
+  `id` bigint(20) NOT NULL,
+  `is_active` bit(1) NOT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  `price` double DEFAULT NULL,
+  `primary_image_name` varchar(255) DEFAULT NULL,
+  `product_attributes` varchar(255) DEFAULT NULL,
+  `quantity_available` int(11) DEFAULT NULL,
+  `product_id` bigint(20) DEFAULT NULL,
+  `created_by` varchar(255) DEFAULT NULL,
+  `created_date` date DEFAULT NULL,
+  `modified_by` varchar(255) DEFAULT NULL,
+  `modified_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKpryf02se86hpv5v7xn5afye4v` (`product_id`),
+  CONSTRAINT `FKpryf02se86hpv5v7xn5afye4v` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `product_variation`
+--
+
+LOCK TABLES `product_variation` WRITE;
+/*!40000 ALTER TABLE `product_variation` DISABLE KEYS */;
+INSERT INTO `product_variation` VALUES (14,_binary '',_binary '',1500,NULL,'{\"size\":\"M-Size\",\"gender\":\"female\"}',5,13,NULL,NULL,NULL,NULL),(15,_binary '',_binary '',1600,NULL,'{\"size\":\"L-Size\",\"gender\":\"male\"}',3,13,NULL,NULL,NULL,NULL),(101,_binary '',_binary '\0',900,NULL,'{\"color\":\"red\",\"size\":\"1\"}',700,95,'seller.seller@tothenew.com','2020-04-20','seller.seller@tothenew.com','2020-04-20'),(102,_binary '',_binary '\0',900,NULL,'{\"color\":\"yellow\",\"size\":\"2\"}',700,95,'seller.seller@tothenew.com','2020-04-20','seller.seller@tothenew.com','2020-04-20'),(103,_binary '',_binary '\0',900,NULL,'{\"color\":\"yellow\",\"size\":\"3\"}',700,95,'seller.seller@tothenew.com','2020-04-20','seller.seller@tothenew.com','2020-04-20'),(104,_binary '',_binary '\0',300,NULL,'{\"color\":\"red\",\"size\":\"4\"}',5000,95,'seller.seller@tothenew.com','2020-04-20','seller.seller@tothenew.com','2020-04-21'),(105,_binary '',_binary '\0',1000,NULL,'{\"color\":\"red\",\"size\":\"7\"}',700,95,'seller.seller@tothenew.com','2020-04-20','seller.seller@tothenew.com','2020-04-20'),(122,_binary '',_binary '\0',60000,NULL,'{\"screen size\":\"52\",\"color\":\"black\"}',700,121,'seller.jewel@gmail.com','2020-04-20','seller.jewel@gmail.com','2020-04-20'),(123,_binary '',_binary '\0',70000,NULL,'{\"screen size\":\"64\",\"color\":\"black\"}',700,121,'seller.jewel@gmail.com','2020-04-20','seller.jewel@gmail.com','2020-04-20'),(124,_binary '',_binary '\0',40000,NULL,'{\"screen size\":\"32\",\"color\":\"gray\"}',700,121,'seller.jewel@gmail.com','2020-04-20','seller.jewel@gmail.com','2020-04-20');
+/*!40000 ALTER TABLE `product_variation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role`
+--
+
+DROP TABLE IF EXISTS `role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `role` (
+  `id` int(11) NOT NULL,
+  `authority` varchar(255) DEFAULT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_irsamgnera6angm0prq1kemt2` (`authority`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role`
+--
+
+LOCK TABLES `role` WRITE;
+/*!40000 ALTER TABLE `role` DISABLE KEYS */;
+INSERT INTO `role` VALUES (1,'ROLE_ADMIN',_binary '\0'),(2,'ROLE_SELLER',_binary '\0'),(3,'ROLE_CUSTOMER',_binary '\0');
+/*!40000 ALTER TABLE `role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `seller`
+--
+
+DROP TABLE IF EXISTS `seller`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `seller` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `failed_attempts` int(11) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `is_active` bit(1) NOT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  `is_expired` bit(1) NOT NULL,
+  `is_locked` bit(1) NOT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `middle_name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `gst` varchar(255) DEFAULT NULL,
+  `company_contact` varchar(255) DEFAULT NULL,
+  `company_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_crgbovyy4gvgsum2yyb3fbfn7` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `seller`
+--
+
+LOCK TABLES `seller` WRITE;
+/*!40000 ALTER TABLE `seller` DISABLE KEYS */;
+INSERT INTO `seller` VALUES (7,'seller.seller@tothenew.com',0,'seller',NULL,_binary '',_binary '\0',_binary '\0',_binary '\0','seller','','$2a$10$AdDAYkNCXoUK6AH4bmnnzOOXtxY7TBRH13mBgQ6UiZDWI3gNJ8sxW','BH7HT754R5','9999988817','dd trading co.'),(110,'raghav.mhc@gmail.com',0,'sagar',NULL,_binary '',_binary '\0',_binary '\0',_binary '\0','mahajan','','Raghav@77','18ADBOT3518P1ZV','9999999999','goyaal jewellers'),(111,'raghav.seller@gmail.com',0,'sagar',NULL,_binary '',_binary '\0',_binary '\0',_binary '\0','mahajan','','$2a$10$yKhyRrXY0FpwGvo934b4OuYLp3s4H2mBqYPYRynRcesGHlbFKkQ92','18ADBOT8818P1ZV','9999999999','pc jewellers pct. lmt.'),(112,'seller.jewel@gmail.com',0,'sagar','http://localhost:8080/downloadImage/home/raghav/eCommerceApp/static/images/users/112.jpg',_binary '',_binary '\0',_binary '\0',_binary '\0','mahajan','','$2a$10$LN7jyMGRkOZYbxzut/Npceti1moK3Din.nAHHzspM4CCtx.2Tow3G','18ADBOT8819P1ZV','9999999999','gini jewells pct. lmt.');
+/*!40000 ALTER TABLE `seller` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `failed_attempts` int(11) DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `is_active` bit(1) NOT NULL,
+  `is_deleted` bit(1) NOT NULL,
+  `is_expired` bit(1) NOT NULL,
+  `is_locked` bit(1) NOT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `middle_name` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_ob8kqyqqgmefl0aco34akdtpe` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_role`
+--
+
+DROP TABLE IF EXISTS `user_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_role` (
+  `user_id` bigint(20) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  PRIMARY KEY (`user_id`,`role_id`),
+  KEY `FKa68196081fvovjhkek5m97n3y` (`role_id`),
+  CONSTRAINT `FKa68196081fvovjhkek5m97n3y` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_role`
+--
+
+LOCK TABLES `user_role` WRITE;
+/*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
+INSERT INTO `user_role` VALUES (1,1),(7,2),(110,2),(111,2),(112,2),(4,3),(106,3);
+/*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `verification_token`
+--
+
+DROP TABLE IF EXISTS `verification_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `verification_token` (
+  `id` bigint(20) NOT NULL,
+  `expiry_date` datetime(6) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `verification_token`
+--
+
+LOCK TABLES `verification_token` WRITE;
+/*!40000 ALTER TABLE `verification_token` DISABLE KEYS */;
+INSERT INTO `verification_token` VALUES (42,'2020-04-20 14:53:27.536000','293c1bd6-e7dd-4162-bd86-779d06fe888d',41),(65,'2020-04-20 23:26:16.095000','21b26aff-c1ed-4a36-94ae-57544711da3b',63),(107,'2020-04-21 15:38:38.380000','72aa2f5d-cb92-4489-8503-015888c39d43',106);
+/*!40000 ALTER TABLE `verification_token` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2020-04-21 13:44:27
