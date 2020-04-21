@@ -144,7 +144,7 @@ public class UserService {
         return token.getUser();
     }
 
-    public void saveRegisteredUser(final User user) {
+    public void saveRegisteredUser(User user) {
         userRepository.save(user);
     }
 

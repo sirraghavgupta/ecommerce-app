@@ -1,6 +1,7 @@
 package com.springbootcamp.ecommerceapp.services;
 
 import com.springbootcamp.ecommerceapp.config.ImageStorageProperties;
+import com.springbootcamp.ecommerceapp.entities.Product;
 import com.springbootcamp.ecommerceapp.entities.ProductVariation;
 import com.springbootcamp.ecommerceapp.entities.User;
 import com.springbootcamp.ecommerceapp.exception.FileStorageException;
@@ -161,7 +162,8 @@ public class ImageService {
             ProductVariation variation = variationRepository.findByIdAndIsDeletedFalse(id).get();
 
             String directoryPath = fileStorageProperties.getUploadDir() + "/products/" +
-                                    variation.getProduct().getId() + "/variations/" + variation.getId();
+                                    variation.getProduct().getId() + "/variations/" + variation.getId()
+                                    + "/secondary/";
             File parentDir = new File(directoryPath);
             parentDir.mkdirs();
 
@@ -170,7 +172,7 @@ public class ImageService {
 //            BigDecimal imageId = variationRepository.getNextValMySequence();
 //            System.out.println(imageId + "#####################################################");
             String newFilename = "products/" + variation.getProduct().getId() +
-                                "/variations/" + variation.getId() + "/" + imageId + "." + extension;
+                                "/variations/" + variation.getId() + "/secondary/" + imageId + "." + extension;
 
             Path targetLocation = this.imageStorageLocation.resolve(newFilename);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
@@ -233,12 +235,13 @@ public class ImageService {
             ProductVariation variation = variationRepository.findByIdAndIsDeletedFalse(id).get();
 
             String directoryPath = fileStorageProperties.getUploadDir() + "/products/" +
-                    variation.getProduct().getId() + "/variations/" + variation.getId();
+                    variation.getProduct().getId() + "/variations/" + variation.getId() +
+                    "/primary/";
             File parentDir = new File(directoryPath);
             parentDir.mkdirs();
 
             String newFilename = "products/" + variation.getProduct().getId() +
-                    "/variations/" + variation.getId() + "/pi" + "." + extension;
+                    "/variations/" + variation.getId() + "/primary/pi" + "." + extension;
 
             Path targetLocation = this.imageStorageLocation.resolve(newFilename);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
@@ -255,5 +258,31 @@ public class ImageService {
             throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
         }
         return response;
+    }
+
+    public String getPrimaryImageOfVariation(ProductVariation variation) {
+
+        String directoryPath = fileStorageProperties.getUploadDir() + "/products/" +
+                 variation.getProduct().getId() + "/variations/" + variation.getId() +
+                "/primary/";
+
+        List<String> images = getAllFilesFromFolder(directoryPath);
+        if(images==null || images.isEmpty())
+            return null;
+
+        return images.stream().findFirst().get();
+    }
+
+    public List<String> getSecondaryImagesOfVariation(ProductVariation variation) {
+        String directoryPath = fileStorageProperties.getUploadDir() + "/products/" +
+                variation.getProduct().getId() + "/variations/" + variation.getId()
+                + "/secondary/";
+
+        List<String> images = getAllFilesFromFolder(directoryPath);
+        if(images==null || images.isEmpty())
+            return null;
+
+        return images;
+
     }
 }

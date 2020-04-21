@@ -28,6 +28,9 @@ public class ProductService {
     EmailService emailService;
 
     @Autowired
+    ImageService imageService;
+
+    @Autowired
     SellerRepository sellerRepository;
 
     @Autowired
@@ -75,7 +78,19 @@ public class ProductService {
     public ProductVariationSellerDto toProductVariationSellerDto(ProductVariation variation){
         if(variation==null)
             return null;
-        return modelMapper.map(variation, ProductVariationSellerDto.class);
+        ProductVariationSellerDto variationSellerDto =  modelMapper.map(variation, ProductVariationSellerDto.class);
+        variationSellerDto.setPrimaryImage(imageService.getPrimaryImageOfVariation(variation));
+        variationSellerDto.setSecondaryImages(imageService.getSecondaryImagesOfVariation(variation));
+        return variationSellerDto;
+    }
+
+    public ProductVariationSellerDto toProductVariationSellerDtoWithPrimaryImagesOnly(ProductVariation variation){
+        if(variation==null)
+            return null;
+        ProductVariationSellerDto variationSellerDto =  modelMapper.map(variation, ProductVariationSellerDto.class);
+        variationSellerDto.setPrimaryImage(imageService.getPrimaryImageOfVariation(variation));
+        variationSellerDto.setSecondaryImages(null);
+        return variationSellerDto;
     }
 
     public String validateNewProduct(String email, ProductSellerDto productDto){
@@ -651,14 +666,15 @@ public class ProductService {
             response = new ErrorVO("Validation failed", message, new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
-        if(product.getVariations()==null || product.getVariations().isEmpty()){
+        List<ProductVariation> variations = variationRepository.findByProductIdAndIsDeletedFalse(id);
+        if(variations==null || variations.isEmpty()){
             message = "No variations available for this product";
             response = new ErrorVO("Validation failed", message, new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         // now we are ready to return the product/
-        ProductCustomerViewDto productCustomerViewDto = getProductCustomerViewDto(product);
+        ProductCustomerViewDto productCustomerViewDto = getProductCustomerViewDto(product, true);
 
         response = new ResponseVO<ProductCustomerViewDto>(productCustomerViewDto, null, new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
@@ -678,6 +694,7 @@ public class ProductService {
 
         Category category= savedCategory.get();
         Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
+
         Set<ProductCustomerViewDto> productCustomerViewDtos;
 
         productCustomerViewDtos = getAllProductCustomerViewDtosByCategory(categoryId, pageable);
@@ -687,14 +704,20 @@ public class ProductService {
 
     }
 
-    public ProductCustomerViewDto getProductCustomerViewDto(Product product){
+    public ProductCustomerViewDto getProductCustomerViewDto(Product product, boolean secondaryImages){
         ProductSellerDto productDto = toProductSellerDto(product);
         productDto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
 
         Set<ProductVariationSellerDto> variationDtos = new HashSet<>();
         List<ProductVariation> variations = variationRepository.findByProductIdAndIsDeletedFalse(product.getId());
+
         variations.forEach((variation -> {
-            ProductVariationSellerDto variationDto = toProductVariationSellerDto(variation);
+            ProductVariationSellerDto variationDto;
+            if(secondaryImages)
+                variationDto = toProductVariationSellerDto(variation);
+            else
+                variationDto = toProductVariationSellerDtoWithPrimaryImagesOnly(variation);
+
             variationDto.setProductDto(null);
             variationDtos.add(variationDto);
         }));
@@ -711,15 +734,19 @@ public class ProductService {
         Set<ProductCustomerViewDto> productCustomerViewDtos = new LinkedHashSet<>();
 
         Category category = categoryRepository.findByIdAndIsDeletedFalse(categoryId).get();
-
-        if(category.getSubCategories() == null || category.getSubCategories().isEmpty()){
+        List<Category> subCategories = categoryRepository.findAllSubCategoriesByCategoryId(categoryId);
+        if(subCategories == null || subCategories.isEmpty()){
             List<Product> products = productRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
             for (Product product : products) {
-                productCustomerViewDtos.add(getProductCustomerViewDto(product));
+                if(product.getIsActive()) {
+                    List<ProductVariation> variations = variationRepository.findByProductIdAndIsDeletedFalse(product.getId());
+                    if(variations!=null || !variations.isEmpty())
+                        productCustomerViewDtos.add(getProductCustomerViewDto(product, false));
+                }
             }
         }
         else{
-            for(Category child : category.getSubCategories()){
+            for(Category child : subCategories){
                 productCustomerViewDtos.addAll(getAllProductCustomerViewDtosByCategory(child.getId(), pageable));
             }
         }
@@ -739,11 +766,6 @@ public class ProductService {
 
         Product product = savedProduct.get();
 
-        if(product.getIsDeleted()){
-            message = "Product with id "+id+ " not found";
-            response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
-        }
         if(!product.getIsActive()){
             message = "Product is inactive.";
             response = new ErrorVO("Validation failed", message, new Date());
@@ -755,7 +777,7 @@ public class ProductService {
         Pageable pageable = pagingService.getPageableObject(offset, size, sortByField, order);
 
         Set<ProductCustomerViewDto> similarProducts = getAllProductCustomerViewDtosByCategory(category.getId(), pageable);
-        similarProducts.remove(getProductCustomerViewDto(product));
+        similarProducts.remove(getProductCustomerViewDto(product, false));
 
         if(similarProducts.isEmpty()){
             message = "No similar products found.";
@@ -780,17 +802,29 @@ public class ProductService {
 
         Product product = savedProduct.get();
 
-        if(product.getIsDeleted()){
-            message = "Product with id "+id+ " not found";
+        if(!product.getIsActive()){
+            message = "Product is inactive.";
             response = new ErrorVO("Validation failed", message, new Date());
-            return new ResponseEntity<BaseVO>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<BaseVO>(response, HttpStatus.BAD_REQUEST);
         }
 
         ProductAdminViewDto productAdminViewDto = new ProductAdminViewDto();
         ProductSellerDto productDto = toProductSellerDto(product);
         productDto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
         productAdminViewDto.setProductDto(productDto);
+
         // add primary images of all the variations in this dto.
+        List<String> primaryImages = new ArrayList<>();
+        List<ProductVariation> variations = variationRepository.findByProductIdAndIsDeletedFalse(id);
+        if(variations!=null || !variations.isEmpty()){
+            for (ProductVariation variation : variations) {
+                String image = imageService.getPrimaryImageOfVariation(variation);
+                if(image!=null){
+                    primaryImages.add(image);
+                }
+            }
+        }
+        productAdminViewDto.setPrimaryImages(primaryImages);
 
         response = new ResponseVO<ProductAdminViewDto>(productAdminViewDto, null, new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
@@ -822,7 +856,20 @@ public class ProductService {
             dto.setCategoryDto(categoryService.toCategoryDto(product.getCategory()));
             viewDto.setProductDto(dto);
             productDtos.add(viewDto);
-            // u need to add the images of variations as well here.
+
+            // add primary images of all the variations in this dto.
+            List<String> primaryImages = new ArrayList<>();
+            List<ProductVariation> variations = variationRepository.findByProductIdAndIsDeletedFalse(product.getId());
+            if(variations!=null || !variations.isEmpty()){
+                for (ProductVariation variation : variations) {
+                    String image = imageService.getPrimaryImageOfVariation(variation);
+                    if(image!=null){
+                        primaryImages.add(image);
+                    }
+                }
+            }
+            viewDto.setPrimaryImages(primaryImages);
+
         });
 
         response = new ResponseVO<List>(productDtos, null, new Date());
