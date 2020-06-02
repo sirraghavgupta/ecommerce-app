@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.web.session.SessionManagementFilter;
 
 @Configuration
 @EnableResourceServer
@@ -41,6 +42,12 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
         return authenticationProvider;
     }
 
+    @Bean
+    CorsFilter corsFilter() {
+        CorsFilter filter = new CorsFilter();
+        return filter;
+    }
+
     @Autowired
     public void configureGlobal(final AuthenticationManagerBuilder authenticationManagerBuilder) {
         authenticationManagerBuilder.authenticationProvider(authenticationProvider());
@@ -49,6 +56,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     @Override
     public void configure(final HttpSecurity http) throws Exception {
         http
+                .addFilterBefore(corsFilter(), SessionManagementFilter.class)
                 .authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers("/admin/home").hasAnyRole("ADMIN")
@@ -74,14 +82,14 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/categories/seller").hasAnyRole("SELLER")
                 .antMatchers("/metadata-field-values").hasAnyRole("ADMIN")
                 .antMatchers("/seller/**").hasAnyRole("SELLER")
-                .antMatchers("/admin/**").hasAnyRole("ADMIN")
+                .antMatchers("/admin/**servlet").hasAnyRole("ADMIN")
                 .antMatchers("/product/deactivate/{id}").hasAnyRole("ADMIN")
                 .antMatchers("/product/activate/{id}").hasAnyRole("ADMIN")
                 .antMatchers("/category/filtering-details").hasAnyRole("CUSTOMER")
                 .antMatchers("/user/image").permitAll()
                 .antMatchers("/product-variation/images/{variationId}", "/product-variation/image/{variationId}").hasAnyRole("SELLER")
                 .antMatchers("/downloadImage/{fileName:.+}").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().anonymous()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()

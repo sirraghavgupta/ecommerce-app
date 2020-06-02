@@ -39,6 +39,11 @@ public class AdminController {
     private ProductService productService;
 
 
+    @GetMapping("/")
+    public String getHome(){
+        return "raghav gupta";
+    }
+
     @GetMapping("/admin/home")
     public ResponseEntity<BaseVO> getAdminHome()
     {

@@ -1,5 +1,6 @@
 package com.springbootcamp.ecommerceapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +27,8 @@ public class Role implements GrantedAuthority {
     @Column(unique = true)
     private String authority;
 
-    @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private Set<User> users;
 
 

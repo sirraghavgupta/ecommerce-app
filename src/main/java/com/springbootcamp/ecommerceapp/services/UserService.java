@@ -466,7 +466,7 @@ public class UserService {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        user.setPassword(passwords.getPassword());
+        user.setPassword( passwordEncoder.encode(passwords.getPassword()));
         saveRegisteredUser(user);
         deleteForgotPasswordToken(token);
 
