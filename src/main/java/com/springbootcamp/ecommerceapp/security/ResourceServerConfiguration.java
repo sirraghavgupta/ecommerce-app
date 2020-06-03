@@ -4,6 +4,7 @@ package com.springbootcamp.ecommerceapp.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -58,6 +59,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
         http
                 .addFilterBefore(corsFilter(), SessionManagementFilter.class)
                 .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/").permitAll()
                 .antMatchers("/admin/home").hasAnyRole("ADMIN")
                 .antMatchers("/seller/home").hasAnyRole("SELLER")
@@ -89,7 +91,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/user/image").permitAll()
                 .antMatchers("/product-variation/images/{variationId}", "/product-variation/image/{variationId}").hasAnyRole("SELLER")
                 .antMatchers("/downloadImage/{fileName:.+}").permitAll()
-                .anyRequest().anonymous()
+                .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
