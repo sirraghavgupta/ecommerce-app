@@ -93,7 +93,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/category/filtering-details/*").permitAll()
                 .antMatchers("/user/image").permitAll()
                 .antMatchers("/product-variation/images/{variationId}", "/product-variation/image/{variationId}").hasAnyRole("SELLER")
-                .antMatchers("/downloadImage/{fileName:.+}").permitAll()
+                .antMatchers("/downloadImage").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

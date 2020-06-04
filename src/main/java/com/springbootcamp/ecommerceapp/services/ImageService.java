@@ -103,8 +103,9 @@ public class ImageService {
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/downloadImage/")
-                    .path(targetLocation.toString())
+                    .path("/downloadImage")
+                    .query("fileName="+targetLocation.toString())
+//                    .path(targetLocation.toString())
                     .toUriString();
 
             user.setImage(fileDownloadUri);
@@ -122,7 +123,11 @@ public class ImageService {
 
     public Resource loadImageAsResource(String fileName) {
         try {
-            Path filePath = this.imageStorageLocation.resolve(fileName).normalize();
+//            Path filePath = this.imageStorageLocation.resolve(fileName).normalize();
+            System.out.println(fileName);
+            Path filePath = Paths.get(fileName);
+            System.out.println(filePath);
+
             Resource resource = new UrlResource(filePath.toUri());
             if(resource.exists()) {
                 return resource;
@@ -179,8 +184,9 @@ public class ImageService {
 
             String filePath = targetLocation.toString();
             String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/downloadImage/")
-                    .path(filePath)
+                    .path("/downloadImage")
+                    .query("fileName="+filePath)
+//                    .path(filePath)
                     .toUriString();
 
             response = new ResponseVO<String>(fileDownloadUri, "Image uploaded successfully", new Date());
@@ -248,8 +254,9 @@ public class ImageService {
 
             String filePath = targetLocation.toString();
             String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/downloadImage/")
-                    .path(filePath)
+                    .path("/downloadImage")
+                    .query("fileName="+filePath)
+//                    .path(filePath)
                     .toUriString();
 
             response = new ResponseVO<String>(fileDownloadUri, "Image uploaded successfully", new Date());
@@ -270,7 +277,14 @@ public class ImageService {
         if(images==null || images.isEmpty())
             return null;
 
-        return images.stream().findFirst().get();
+        String filePath = images.stream().findFirst().get();
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/downloadImage")
+                .query("fileName="+filePath)
+//                    .path(targetLocation.toString())
+                .toUriString();
+
+        return fileDownloadUri;
     }
 
     public List<String> getSecondaryImagesOfVariation(ProductVariation variation) {
@@ -279,10 +293,21 @@ public class ImageService {
                 + "/secondary/";
 
         List<String> images = getAllFilesFromFolder(directoryPath);
+        List<String> fileDownloadUris = new ArrayList<>();
+
+        for(String filePath : images){
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/downloadImage")
+                    .query("fileName="+filePath)
+//                    .path(targetLocation.toString())
+                    .toUriString();
+            fileDownloadUris.add(fileDownloadUri);
+        }
+
         if(images==null || images.isEmpty())
             return null;
 
-        return images;
+        return fileDownloadUris;
 
     }
 }
