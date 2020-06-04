@@ -227,7 +227,7 @@ public class CategoryService {
             List<Category> rootCategories = categoryRepository.findByParentIdIsNullAndIsDeletedFalse();
             List<CategoryDto> categoryDtos = new ArrayList<>();
             rootCategories.forEach((e) -> {
-                categoryDtos.add(toCategoryDtoNonRecursive(e));
+                categoryDtos.add(toCategoryDto(e));
             });
             response = new ResponseVO<List>(categoryDtos, null, new Date());
             return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
@@ -243,7 +243,7 @@ public class CategoryService {
         List<CategoryDto> subCategoryDtos = new ArrayList<>();
 
         subCategories.forEach((e)->{
-            subCategoryDtos.add(toCategoryDtoNonRecursive(e));
+            subCategoryDtos.add(toCategoryDto(e));
         });
         response = new ResponseVO<List>(subCategoryDtos, null, new Date());
         return new ResponseEntity<BaseVO>(response, HttpStatus.OK);
