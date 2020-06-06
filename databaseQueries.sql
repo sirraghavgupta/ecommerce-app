@@ -1,6 +1,9 @@
 create database ecommerce;
 drop database ecommerce; 
 
+delete from category where id=256;
+select * from category;
+
 use ecommerce;
 select * from user;
 select * from user_role;
@@ -20,6 +23,7 @@ select * from cart;
 select * from order_product;
 select * from order_status;
 select * from orders;
+select * from forgot_password_token;
 desc product_variation;
 desc user_role;
 desc product_review;
@@ -38,7 +42,7 @@ select * from oauth_refresh_token;
 
 update address set created_by="seller.seller@tothenew.com", modified_by="seller.seller@tothenew.com" where id=108;
 delete from user_role where user_id=1 and role_id=3;
-delete from product where id=35;
+delete from product where id=;
 delete from category where id=115;
 delete from category_metadata_field_values where category_id=89 and category_metadata_field_id=82;
 update category_metadata_field set is_deleted=false where id>0;
@@ -55,7 +59,12 @@ v.category_id = 86 and
 v.is_deleted=false and
 f.is_deleted=false;
 
-update product set is_deleted=false where id=95;
+update product set is_deleted=false where parent_id=196;
 
+delete from customer where id=132;
+update admin set is_locked=false where id=1;
+
+delete from category where id=196;
+select * from category;
 
 

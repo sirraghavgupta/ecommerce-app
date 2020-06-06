@@ -44,7 +44,7 @@ public class LoginLogoutController {
 
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<BaseVO> getResetPasswordToken(@RequestBody String email, WebRequest request){
+    public ResponseEntity<BaseVO> getResetPasswordToken(@RequestParam String email, WebRequest request){
         return userService.initiatePasswordReset(email, request);
     }
 

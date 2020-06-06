@@ -286,7 +286,7 @@ public class UserService {
 
         String email = user.getEmail();
         String subject = "Password Reset Link";
-        String passwordResetUrl = "http://localhost:8080" + "/reset-password?token=" + token;
+        String passwordResetUrl = "http://localhost:3000" + "/reset-password?token=" + token;
         String emailMessage = "please click on this link to reset your password";
         String emailBody = emailMessage + "\r\n" + passwordResetUrl;
         System.out.println(passwordResetUrl);
