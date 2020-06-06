@@ -72,7 +72,9 @@ public class ProductService {
     public ProductVariation toProductVariation(ProductVariationSellerDto variationDto){
         if(variationDto==null)
             return null;
-        return modelMapper.map(variationDto, ProductVariation.class);
+        ProductVariation variation = modelMapper.map(variationDto, ProductVariation.class);
+        variation.setProduct(productRepository.findByIdAndIsDeletedFalse(variationDto.getProductId()).get());
+        return variation;
     }
 
     public ProductVariationSellerDto toProductVariationSellerDto(ProductVariation variation){
