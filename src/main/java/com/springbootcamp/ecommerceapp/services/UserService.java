@@ -271,7 +271,7 @@ public class UserService {
 
         // prepare the email contents
         String email = user.getEmail();
-        String confirmationUrl = "http://localhost:8080" + appUrl +
+        String confirmationUrl = "http://localhost:3000" + appUrl +
                 "/activate/customer?token=" + token;
 
 //        String message = messages.getMessage("message.regSucc", null, locale);
