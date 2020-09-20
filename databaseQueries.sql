@@ -67,4 +67,7 @@ update admin set is_locked=false where id=1;
 delete from category where id=196;
 select * from category;
 
+update customer set failed_attempts=0 where id=106;
+update customer set is_locked=false where id=106;
+delete from customer where id=378;
 
